@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Navigator Mode</title>
+    <!-- Link to CSS -->
+    <link rel="stylesheet" href="navigator.css">
+</head>
+<body>
+
+    <div id="hazard-announcement" aria-live="assertive" aria-atomic="true"></div>
+
+    <!--Top Bar-->
+    <div id="top-bar">
+        <button id="back-btn" aria-label="Go back" onclick="history.back()">🏠︎</button>
+        <span id="top-title">Voice Navigator Active</span>
+    </div>
+
+    <!--Voiceover Controls-->
+    <div id="voiceover-box">
+        <div id="voiceover-header">
+            <span id="voiceover-title">Voiceover Controls</span>
+        </div>
+
+        <div id="volume-btns">
+            <button class="vol-btn" id="vol-low" aria-label="Minimal alerts" onclick="setFrequency('low')">Minimal</button>
+            <button class="vol-btn" id="vol-medium" aria-label="Normal alerts" onclick="setFrequency('medium')">Normal</button>
+            <button class="vol-btn active" id="vol-high" aria-label="All alerts" onclick="setFrequency('high')">All Alerts</button>
+        </div>
+    </div>
+
+    <!--Destination Search-->
+    <div id="search-box">
+        <div id="search-title">Where To?</div>
+        <div id="search-row">
+            <input type="text" id="destination-input" placeholder="Enter Destination" oninput="onSearchInput(this.value)"/>
+            <button id="mic-btn" aria-label="Voice input" onclick="startVoiceInput()">🎤</button>
+        </div>
+        <div id="search-results"></div>
+        <button id="go-btn" aria-label="Start navigation" onclick="startNavigation()" disabled>Go →</button>
+    </div>
+
+    <!--Map-->
+    <div id="map" class="map-container"></div>
+
+    <!--Desination Card-->
+    <div id="direction-box" role="status" aria-label="Current direction">
+        <span id="direction-arrow">↓</span>
+        <div id="direction-text">Waiting for route...</div>
+        <div id="direction-sub">Following accessible route</div>
+    </div>
+
+    <!--Hazard Banner-->
+    <div id="hazard-banner" role="alert">
+        <span>⚠️</span>
+        <span id="hazard-banner-text">Cracked sidewalk — 80 ft ahead</span>
+    </div>
+
+    <!--Actions-->
+    <div id="buttons-grid">
+        <button class="action-btn" aria-label="Repeat directions" onclick="repeatDirection()">
+            <span class="icon">🔉</span> Repeat directions
+        </button>
+        <button class="action-btn" aria-label="What's nearby" onclick="whatsNearby()">
+            <span class="icon">📍</span> What's nearby
+        </button>
+        <button class="action-btn" aria-label="Report hazard here" onclick="window.location.href='report.html'">
+            <span class="icon">⚠️</span> Report hazard here
+        </button>
+        <button class="action-btn" aria-label="Call for help" onclick="callForHelp()">
+            <span class="icon">📞</span> Call for help
+        </button>
+    </div>
+
+    <!--Scripts-->
+    <script src="js/config.js"></script>
+    <script src="js/voice.js"></script>
+    <script src="js/map2.js"></script>
+    <script src="navigator.js"></script>
+</body>
+</html>
