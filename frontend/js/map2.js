@@ -9,7 +9,7 @@ let warnedRouteHazards = new Set();
 let warnedNearbyHazards = new Set();
 let lastDeviationAlertAt = 0;
 
-const DEMO_ORIGIN = { lat: 44.56463, lng: -123.27875 }; // Memorial Union
+const DEMO_ORIGIN = {  lat: 44.567583 , lng: -123.279667}; // Memorial Union
 
 const PLACE_COORDINATES = {
   "Kelley Engineering Center, OSU": { lat: 44.56715, lng: -123.27889 },
