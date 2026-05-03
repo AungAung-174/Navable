@@ -207,7 +207,7 @@
     <div id="location-label">Auto-detected location</div>
     <div id="location-text">Detecting location...</div>
   </div>
-  <div class="section-title">Demo hazard location</div>
+  <div class="section-title">Hazard Location</div>
   <select id="demo-location-select"
           onchange="selectDemoLocation(this.value)"
           style="width: 100%; background-color: #1a1a1a; border: 2px solid #FFC107; border-radius: 14px; padding: 14px; color: #FFC107; font-size: 15px; margin-bottom: 8px;">
@@ -393,7 +393,7 @@
       document.getElementById("location-text").textContent =
         `${location.label}: ${userLat.toFixed(5)}, ${userLng.toFixed(5)}`;
 
-      document.getElementById("pin-text").textContent = "Demo pin set";
+      document.getElementById("pin-text").textContent = "pin set";
       document.getElementById("pin-icon").textContent = "✅";
     }
 
