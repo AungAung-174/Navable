@@ -76,7 +76,7 @@ function placeHazardPins() {
 
     marker.addListener("click", () => {
       info.open(map, marker);
-      speak(h.label + ". Proceed with caution.");
+      speakAlert(h.label + ". Proceed with caution.");
     });
   });
 }
@@ -113,7 +113,7 @@ function getUserLocation() {
 
 function showRoute() {
   if (!navigator.geolocation) {
-    speak("Location not available on this device.");
+    speakAlert("Location not available on this device.");
     return;
   }
 
@@ -138,13 +138,13 @@ function showRoute() {
         
         const leg = result.routes[0].legs[0];
         const step = leg.steps[0].instructions.replace(/<[^>]*>/g, "");
-        document.getElementById("nav-text").textContent = step;
-        speak("Route found. " + leg.duration.text + " away. " + step);
+        document.getElementById("direction-text").textContent = step;
+        speakAlert("Route found. " + leg.duration.text + " away. " + step);
         
         // Start real-time navigation tracking
         startRealTimeNavigation();
       } else {
-        speak("Could not find a route. Please try again.");
+        speakAlert("Could not find a route. Please try again.");
       }
     });
   });
@@ -221,7 +221,7 @@ function checkRouteDeviation(userPos) {
   });
 
   if (minDistance > deviationThreshold) {
-    speak("You have deviated from the route. Recalculating...");
+    speakAlert("You have deviated from the route. Recalculating...");
     // Recalculate route from current position
     showRoute();
   }
@@ -238,7 +238,7 @@ function checkNearbyHazards(userPos, accuracy) {
 
     if (distance < proximityThreshold && distance < (accuracy || 20)) {
       const meters = Math.round(distance);
-      speak(`Alert: ${hazard.label} in ${meters} meters ahead. Use caution.`);
+      speakAlert(`Alert: ${hazard.label} in ${meters} meters ahead. Use caution.`);
     }
   });
 }
@@ -250,7 +250,7 @@ function updateNavigationStep(userPos) {
   const steps = legs[0].steps;
 
   if (currentStep >= steps.length) {
-    speak("You have arrived at your destination.");
+    speakAlert("You have arrived at your destination.");
     navigationActive = false;
     stopRealTimeNavigation();
     return;
@@ -274,7 +274,7 @@ function updateNavigationStep(userPos) {
       const distance = nextStep.distance.text;
       
       document.getElementById("nav-text").textContent = instruction;
-      speak(`Next: ${instruction}. Distance: ${distance}`);
+      speakAlert(`Next: ${instruction}. Distance: ${distance}`);
     }
   }
 }

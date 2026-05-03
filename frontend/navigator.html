@@ -403,10 +403,21 @@
     </button>
   </div>
 
+  <script src="js/config.js"></script>
   <script src="js/voice.js"></script>
-  <script src="js/map.js"></script>
-  <script async defer
-    src=""></script>
+  <script src="js/map2.js"></script>
+  <script>
+    async function loadGoogleMaps() {
+      const res = await fetch(`${API_BASE}/config/maps`);
+      const config = await res.json();
+      const script = document.createElement("script");
+      script.src = `https://maps.googleapis.com/maps/api/js?key=${config.googleMapsApiKey}&libraries=geometry&callback=initMap`;
+      script.async = true;
+      script.defer = true;
+      document.head.appendChild(script);
+    }
+    loadGoogleMaps();
+  </script>
   <script>
     let lastDirection = "Waiting for route...";
     let voiceEnabled = true;
