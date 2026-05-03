@@ -21,7 +21,7 @@ db = firestore.client()
 
 # Gemini
 genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
-model = genai.GenerativeModel("gemini-1.5-flash-lite")
+model = genai.GenerativeModel("gemini-2.5-flash")
 
 # Flask
 app = Flask(__name__)
@@ -35,7 +35,7 @@ def analyze_hazard(photo_bytes, description=""):
     prompt = f"""
 You are an accessibility hazard analyzer for wheelchair users and visually impaired pedestrians.
 
-Analyze the photo and the user description. Identify whether there is an accessibility hazard.
+Analyze the photo and the user description. Be CONSERVATIVE — only flag actual hazards.
 
 Return ONLY valid JSON. Do not include markdown, explanation, or code fences.
 
@@ -46,18 +46,23 @@ Use this exact JSON format:
   "alert_text": "one short voice alert under 15 words"
 }}
 
-Rules:
-- Use "high" if the hazard blocks wheelchair access, blocks a curb ramp, creates a fall risk, or forces a person into the road.
-- Use "medium" if the hazard makes travel harder but does not fully block the path.
-- Use "low" if it is minor or only requires awareness.
-- Use "none" if there is no clear accessibility hazard.
-- The alert_text should be short, clear, and useful for voice navigation.
-- Do not invent exact distance unless the description gives one.
-- Do not mention uncertainty in the alert_text.
-- If the photo is unclear, use the description to decide.
-- If both photo and description are unclear, return hazard_type "other" and urgency "low".
+CRITICAL RULES:
+- DEFAULT to hazard_type "none" and urgency "low" unless you see a CLEAR accessibility blocker.
+- Normal pedestrian activity, parked cars in parking spots, buses at stops, and people walking are NOT hazards.
+- A vehicle is only a hazard if it is on a sidewalk, blocking a curb ramp, or actively blocking the only accessible path.
+- A crosswalk with a vehicle stopped at it (waiting for pedestrians, at a stop) is NORMAL, not a hazard.
+- Construction is only "high" if it blocks the sidewalk completely with no clear alternative.
+- Cracked pavement is "low" unless severe enough to flip a wheelchair.
 
-User description:
+Urgency definitions:
+- "high": fully blocks wheelchair access OR forces a wheelchair user into vehicle traffic
+- "medium": makes travel meaningfully harder but a workaround exists
+- "low": minor issue, awareness only
+- For hazard_type "none", always use urgency "low"
+
+The alert_text should be specific to what is shown. Avoid generic warnings.
+
+User description (use this to disambiguate):
 {description}
 """
 
