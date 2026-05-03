@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ClearPath — Report Confirmed</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background-color: #f5f5f5;
+      font-family: Arial, sans-serif;
+      min-height: 100vh;
+      padding: 24px;
+    }
+
+    #top-bar {
+      display: flex;
+      align-items: center;
+      margin-bottom: 24px;
+    }
+
+    #back-btn {
+      background: none;
+      border: none;
+      font-size: 24px;
+      cursor: pointer;
+      margin-right: 12px;
+    }
+
+    h1 {
+      font-size: 22px;
+      font-weight: bold;
+      color: #1a1a1a;
+    }
+
+    #success-box {
+      background-color: #2E7D32;
+      border-radius: 16px;
+      padding: 28px;
+      text-align: center;
+      color: white;
+      margin-bottom: 20px;
+    }
+
+    #success-icon {
+      font-size: 48px;
+      margin-bottom: 12px;
+    }
+
+    #success-title {
+      font-size: 22px;
+      font-weight: bold;
+      margin-bottom: 6px;
+    }
+
+    #success-subtitle {
+      font-size: 14px;
+      color: #a8d5b0;
+    }
+
+    #impact-box {
+      background-color: white;
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 16px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+    }
+
+    #impact-title {
+      font-size: 13px;
+      color: #757575;
+      margin-bottom: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .impact-row {
+      display: flex;
+      align-items: center;
+      margin-bottom: 10px;
+      font-size: 15px;
+      color: #1a1a1a;
+    }
+
+    .impact-row .icon {
+      font-size: 20px;
+      margin-right: 12px;
+      width: 28px;
+      text-align: center;
+    }
+
+    #hazard-detail-box {
+      background-color: white;
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 24px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+    }
+
+    #hazard-detail-title {
+      font-size: 13px;
+      color: #757575;
+      margin-bottom: 8px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    #hazard-type-badge {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: bold;
+      margin-bottom: 8px;
+    }
+
+    #hazard-alert-text {
+      font-size: 14px;
+      color: #444;
+      line-height: 1.5;
+    }
+
+    .bottom-btn {
+      display: block;
+      width: 100%;
+      padding: 16px;
+      border-radius: 12px;
+      border: none;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      margin-bottom: 12px;
+      text-align: center;
+    }
+
+    #report-another-btn {
+      background-color: #2E7D32;
+      color: white;
+    }
+
+    #back-map-btn {
+      background-color: white;
+      color: #2E7D32;
+      border: 2px solid #2E7D32;
+    }
+  </style>
+</head>
+<body>
+
+  <div id="top-bar">
+    <button id="back-btn"
+            aria-label="Go back"
+            onclick="window.location.href='map.html'">←</button>
+    <h1>Report Confirmed</h1>
+  </div>
+
+  <!-- Success banner -->
+  <div id="success-box" role="status" aria-live="polite">
+    <div id="success-icon">✅</div>
+    <div id="success-title">Your report is live</div>
+    <div id="success-subtitle" id="impact-count">Alerting nearby users...</div>
+  </div>
+
+  <!-- Impact stats -->
+  <div id="impact-box">
+    <div id="impact-title">What happened</div>
+    <div class="impact-row">
+      <span class="icon">📍</span>
+      <span>Pin is now live on the map</span>
+    </div>
+    <div class="impact-row">
+      <span class="icon">🔊</span>
+      <span>Voice alerts sent to nearby users</span>
+    </div>
+    <div class="impact-row">
+      <span class="icon">👥</span>
+      <span id="nearby-count">Checking nearby users...</span>
+    </div>
+  </div>
+
+  <!-- Hazard detail -->
+  <div id="hazard-detail-box">
+    <div id="hazard-detail-title">Your Report</div>
+    <div id="hazard-type-badge">Loading...</div>
+    <div id="hazard-alert-text">Loading alert text...</div>
+  </div>
+
+  <button class="bottom-btn" id="report-another-btn"
+          aria-label="Report another hazard"
+          onclick="window.location.href='report.html'">
+    Report Another Hazard
+  </button>
+
+  <button class="bottom-btn" id="back-map-btn"
+          aria-label="Back to map"
+          onclick="window.location.href='map.html'">
+    Back to Map
+  </button>
+
+  <script src="js/voice.js"></script>
+  <script>
+    // Urgency colors
+    const URGENCY_COLORS = {
+      high:   { bg: "#FFEBEE", text: "#C62828" },
+      medium: { bg: "#FFF8E1", text: "#F57F17" },
+      low:    { bg: "#E8F5E9", text: "#2E7D32" },
+    };
+
+    // Load report data passed from report.html via sessionStorage
+    window.addEventListener("load", () => {
+      const raw = sessionStorage.getItem("lastReport");
+
+      if (raw) {
+        const report = JSON.parse(raw);
+
+        // Badge color by urgency
+        const badge = document.getElementById("hazard-type-badge");
+        const colors = URGENCY_COLORS[report.urgency] || URGENCY_COLORS.low;
+        badge.textContent = (report.hazard_type || "hazard").replace("_", " ").toUpperCase();
+        badge.style.backgroundColor = colors.bg;
+        badge.style.color = colors.text;
+
+        // Alert text
+        document.getElementById("hazard-alert-text").textContent =
+          report.alert_text || "Hazard reported at this location.";
+
+        // Nearby count (from Firebase response)
+        const count = report.nearby_count || 0;
+        document.getElementById("nearby-count").textContent =
+          count + " people nearby will be rerouted";
+        document.getElementById("success-subtitle").textContent =
+          count + " people nearby will be rerouted";
+
+        // Read confirmation aloud
+        speakAlert("Report confirmed. " + (report.alert_text || "Hazard reported.")
+          + " " + count + " people nearby have been alerted.");
+      }
+    });
+  </script>
+
+</body>
+</html>

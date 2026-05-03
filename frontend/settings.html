@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ClearPath — Settings</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background-color: #f5f5f5;
+      font-family: Arial, sans-serif;
+      min-height: 100vh;
+      padding: 24px;
+    }
+
+    #top-bar {
+      display: flex;
+      align-items: center;
+      margin-bottom: 24px;
+    }
+
+    #back-btn {
+      background: none;
+      border: none;
+      font-size: 24px;
+      cursor: pointer;
+      margin-right: 12px;
+    }
+
+    h1 {
+      font-size: 22px;
+      font-weight: bold;
+      color: #1a1a1a;
+    }
+
+    .section-title {
+      font-size: 12px;
+      color: #757575;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 8px;
+      margin-top: 20px;
+    }
+
+    .setting-card {
+      background-color: white;
+      border-radius: 12px;
+      padding: 16px 20px;
+      margin-bottom: 2px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+    }
+
+    .setting-left {
+      display: flex;
+      align-items: center;
+    }
+
+    .setting-icon {
+      font-size: 22px;
+      margin-right: 14px;
+      width: 28px;
+      text-align: center;
+    }
+
+    .setting-label {
+      font-size: 15px;
+      color: #1a1a1a;
+      font-weight: 500;
+    }
+
+    .setting-desc {
+      font-size: 12px;
+      color: #999;
+      margin-top: 2px;
+    }
+
+    /* Toggle switch */
+    .toggle {
+      position: relative;
+      width: 50px;
+      height: 28px;
+      flex-shrink: 0;
+    }
+
+    .toggle input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-color: #ccc;
+      border-radius: 28px;
+      transition: 0.3s;
+    }
+
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 22px;
+      width: 22px;
+      left: 3px;
+      bottom: 3px;
+      background-color: white;
+      border-radius: 50%;
+      transition: 0.3s;
+    }
+
+    input:checked + .slider {
+      background-color: #2E7D32;
+    }
+
+    input:checked + .slider:before {
+      transform: translateX(22px);
+    }
+
+    #mode-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 8px;
+    }
+
+    .mode-btn {
+      background-color: white;
+      border: 2px solid #e0e0e0;
+      border-radius: 12px;
+      padding: 16px 12px;
+      text-align: center;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 500;
+      color: #1a1a1a;
+    }
+
+    .mode-btn .mode-icon {
+      font-size: 28px;
+      display: block;
+      margin-bottom: 6px;
+    }
+
+    .mode-btn.active {
+      border-color: #2E7D32;
+      background-color: #E8F5E9;
+      color: #2E7D32;
+    }
+  </style>
+</head>
+<body>
+
+  <div id="top-bar">
+    <button id="back-btn"
+            aria-label="Go back"
+            onclick="history.back()">←</button>
+    <h1>Settings</h1>
+  </div>
+
+  <!-- Disability mode -->
+  <div class="section-title">Disability Mode</div>
+  <div id="mode-grid">
+    <button class="mode-btn active" id="mode-wheelchair"
+            aria-label="Wheelchair mode"
+            onclick="setMode('wheelchair')">
+      <span class="mode-icon">♿</span>
+      Wheelchair
+    </button>
+    <button class="mode-btn" id="mode-vi"
+            aria-label="Visually impaired mode"
+            onclick="setMode('vi')">
+      <span class="mode-icon">👁</span>
+      Visually Impaired
+    </button>
+    <button class="mode-btn" id="mode-aid"
+            aria-label="Walking with aid mode"
+            onclick="setMode('aid')">
+      <span class="mode-icon">🦯</span>
+      Walking with Aid
+    </button>
+    <button class="mode-btn" id="mode-reporter"
+            aria-label="Reporter mode"
+            onclick="setMode('reporter')">
+      <span class="mode-icon">📢</span>
+      Reporter
+    </button>
+  </div>
+
+  <!-- Voice settings -->
+  <div class="section-title">Voice & Audio</div>
+
+  <div class="setting-card">
+    <div class="setting-left">
+      <span class="setting-icon">🔊</span>
+      <div>
+        <div class="setting-label">Voice Alerts</div>
+        <div class="setting-desc">Read hazards aloud automatically</div>
+      </div>
+    </div>
+    <label class="toggle" aria-label="Toggle voice alerts">
+      <input type="checkbox" id="toggle-voice" checked
+             onchange="saveSetting('voiceAlerts', this.checked)">
+      <span class="slider"></span>
+    </label>
+  </div>
+
+  <div class="setting-card">
+    <div class="setting-left">
+      <span class="setting-icon">🧭</span>
+      <div>
+        <div class="setting-label">Navigation Voice</div>
+        <div class="setting-desc">Read turn-by-turn directions aloud</div>
+      </div>
+    </div>
+    <label class="toggle" aria-label="Toggle navigation voice">
+      <input type="checkbox" id="toggle-nav-voice" checked
+             onchange="saveSetting('navVoice', this.checked)">
+      <span class="slider"></span>
+    </label>
+  </div>
+
+  <!-- Display settings -->
+  <div class="section-title">Display</div>
+
+  <div class="setting-card">
+    <div class="setting-left">
+      <span class="setting-icon">🔡</span>
+      <div>
+        <div class="setting-label">Large Text</div>
+        <div class="setting-desc">Increase font size throughout app</div>
+      </div>
+    </div>
+    <label class="toggle" aria-label="Toggle large text">
+      <input type="checkbox" id="toggle-large-text"
+             onchange="saveSetting('largeText', this.checked); applyLargeText(this.checked)">
+      <span class="slider"></span>
+    </label>
+  </div>
+
+  <div class="setting-card">
+    <div class="setting-left">
+      <span class="setting-icon">🌗</span>
+      <div>
+        <div class="setting-label">High Contrast</div>
+        <div class="setting-desc">Stronger color contrast for visibility</div>
+      </div>
+    </div>
+    <label class="toggle" aria-label="Toggle high contrast">
+      <input type="checkbox" id="toggle-contrast"
+             onchange="saveSetting('highContrast', this.checked); applyContrast(this.checked)">
+      <span class="slider"></span>
+    </label>
+  </div>
+
+  <script src="js/voice.js"></script>
+  <script>
+    // Load saved settings on page load
+    window.addEventListener("load", () => {
+      const voice      = localStorage.getItem("voiceAlerts") !== "false";
+      const navVoice   = localStorage.getItem("navVoice")    !== "false";
+      const largeText  = localStorage.getItem("largeText")   === "true";
+      const contrast   = localStorage.getItem("highContrast") === "true";
+      const mode       = localStorage.getItem("disabilityMode") || "wheelchair";
+
+      document.getElementById("toggle-voice").checked      = voice;
+      document.getElementById("toggle-nav-voice").checked  = navVoice;
+      document.getElementById("toggle-large-text").checked = largeText;
+      document.getElementById("toggle-contrast").checked   = contrast;
+
+      if (largeText) applyLargeText(true);
+      if (contrast)  applyContrast(true);
+      setMode(mode, false); // false = don't announce on load
+    });
+
+    function saveSetting(key, value) {
+      localStorage.setItem(key, value);
+    }
+
+    function setMode(mode, announce = true) {
+      localStorage.setItem("disabilityMode", mode);
+
+      // Update button styles
+      ["wheelchair", "vi", "aid", "reporter"].forEach(m => {
+        document.getElementById("mode-" + m).classList.toggle("active", m === mode);
+      });
+
+      if (announce) {
+        const labels = {
+          wheelchair: "Wheelchair mode selected",
+          vi:         "Visually impaired mode selected",
+          aid:        "Walking with aid mode selected",
+          reporter:   "Reporter mode selected",
+        };
+        speakAlert(labels[mode] || "Mode updated");
+      }
+    }
+
+    function applyLargeText(on) {
+      document.body.style.fontSize = on ? "120%" : "";
+    }
+
+    function applyContrast(on) {
+      document.body.style.filter = on ? "contrast(1.3)" : "";
+    }
+  </script>
+
+</body>
+</html>

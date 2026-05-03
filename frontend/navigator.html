@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ClearPath — Navigator Mode</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background-color: #085041;
+      color: white;
+      font-family: Arial, sans-serif;
+      min-height: 100vh;
+      padding: 24px;
+    }
+
+    #status-bar {
+      font-size: 14px;
+      color: #a8d5c2;
+      margin-bottom: 8px;
+    }
+
+    h1 {
+      font-size: 28px;
+      font-weight: bold;
+      margin-bottom: 4px;
+    }
+
+    #subtitle {
+      font-size: 14px;
+      color: #a8d5c2;
+      margin-bottom: 24px;
+    }
+
+    #direction-box {
+      background-color: #0a6b55;
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 16px;
+    }
+
+    #direction-label {
+      font-size: 13px;
+      color: #a8d5c2;
+      margin-bottom: 6px;
+    }
+
+    #direction-text {
+      font-size: 22px;
+      font-weight: bold;
+      line-height: 1.3;
+    }
+
+    #hazard-box {
+      background-color: #8B0000;
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 24px;
+      display: none;
+    }
+
+    #hazard-label {
+      font-size: 13px;
+      color: #ffaaaa;
+      margin-bottom: 4px;
+    }
+
+    #hazard-text {
+      font-size: 16px;
+      font-weight: bold;
+    }
+
+    #buttons-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+
+    .action-btn {
+      background-color: #0a6b55;
+      border: none;
+      border-radius: 12px;
+      padding: 24px 12px;
+      color: white;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      text-align: center;
+      line-height: 1.4;
+    }
+
+    .action-btn:active {
+      background-color: #064d3d;
+    }
+
+    .action-btn .icon {
+      font-size: 28px;
+      display: block;
+      margin-bottom: 8px;
+    }
+
+    #call-btn {
+      background-color: #c0392b;
+    }
+
+    #call-btn:active {
+      background-color: #922b21;
+    }
+
+    /* screen reader only — invisible but readable by VoiceOver */
+    #hazard-announcement {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      clip: rect(0,0,0,0);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Screen reader live region -->
+  <div id="hazard-announcement" aria-live="assertive" aria-atomic="true"></div>
+
+  <div id="status-bar">🟢 Navigator Mode Active</div>
+  <h1>Navigator Mode</h1>
+  <p id="subtitle">Voice-first navigation for visually impaired users</p>
+
+  <!-- Current direction -->
+  <div id="direction-box" role="status" aria-label="Current direction">
+    <div id="direction-label">Current Direction</div>
+    <div id="direction-text">Waiting for route...</div>
+  </div>
+
+  <!-- Hazard alert (hidden until triggered) -->
+  <div id="hazard-box" role="alert" aria-label="Hazard alert">
+    <div id="hazard-label">⚠️ Hazard Ahead</div>
+    <div id="hazard-text"></div>
+  </div>
+
+  <!-- 4 quick-action buttons -->
+  <div id="buttons-grid">
+    <button class="action-btn"
+            aria-label="Repeat last direction"
+            onclick="repeatDirection()">
+      <span class="icon">🔁</span>
+      Repeat
+    </button>
+
+    <button class="action-btn"
+            aria-label="What hazards are nearby"
+            onclick="whatsNearby()">
+      <span class="icon">📍</span>
+      What's Nearby
+    </button>
+
+    <button class="action-btn"
+            aria-label="Report a hazard"
+            onclick="window.location.href='report.html'">
+      <span class="icon">🚨</span>
+      Report Hazard
+    </button>
+
+    <button class="action-btn" id="call-btn"
+            aria-label="Call for help"
+            onclick="callForHelp()">
+      <span class="icon">📞</span>
+      Call for Help
+    </button>
+  </div>
+
+  <script src="js/voice.js"></script>
+  <script>
+    // Last spoken direction — stored so Repeat button works
+    let lastDirection = "Waiting for route...";
+
+    // Called by voice.js or map.js when a new direction step is ready
+    function setDirection(text) {
+      lastDirection = text;
+      document.getElementById("direction-text").textContent = text;
+      speakDirection(text);
+    }
+
+    // Called by voice.js when a hazard is within 300ft
+    function showHazardAlert(hazard, distFt) {
+      const text = (hazard.alert_text || "Hazard ahead.")
+                 + " In " + Math.round(distFt) + " feet.";
+      document.getElementById("hazard-text").textContent = text;
+      document.getElementById("hazard-box").style.display = "block";
+      announceHazard({ alert_text: text });
+    }
+
+    function repeatDirection() {
+      speakAlert(lastDirection);
+    }
+
+    function whatsNearby() {
+      if (!window.hazards || window.hazards.length === 0) {
+        speakAlert("No hazards reported nearby.");
+        return;
+      }
+      const count = window.hazards.filter(h => !h.alerted).length;
+      speakAlert(count + " hazards reported in this area. Nearest hazard: "
+        + (window.hazards[0].alert_text || "unknown hazard"));
+    }
+
+    function callForHelp() {
+      speakAlert("Calling for help. Please stay where you are.");
+      // In production: window.location.href = "tel:911";
+    }
+
+    // Start GPS proximity watching when page loads
+    window.addEventListener("load", () => {
+      watchUserLocation();
+    });
+  </script>
+
+</body>
+</html>
