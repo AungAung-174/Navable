@@ -2,7 +2,7 @@ const PRESETS =
 {
     wheelchair:
     {
-        voiceAlerts: true,
+        voiceAlerts: false,
         alertFrequency: "medium",
         speechRate: "normal",
         alertDistance: 300,
@@ -14,7 +14,7 @@ const PRESETS =
     vi:
     {
         voiceAlerts: true,
-        alertFrequency: "high",
+        alertFrequency: "medium",
         speechRate: "slow",
         alertDistance: 500,
         autoReroute: true,
@@ -25,7 +25,7 @@ const PRESETS =
     reporter:
     {
         voiceAlerts: false,
-        alertFrequency: "low",
+        alertFrequency: "medium",
         speechRate: "normal", 
         alertDistance: 100,
         autoReroute: false,
@@ -36,14 +36,19 @@ const PRESETS =
 
 function applyPreset(mode)
 {
-    const p = PRESETS[mode];
+    const settings = PRESETS[mode];
 
-    localStorage.setItem("disabilityMode", mode);
+    localStorage.setItem("currentMode", mode);
 
-    Object.keys(p).forEach(key =>
+    if (localStorage.getItem("voiceAlerts") === null)
     {
-        localStorage.setItem(key, p[key]);
-    });
+        localStorage.setItem("voiceAlerts", settings.voiceAlerts);
+    }
+
+    if (localStorage.getItem("alertFrequency") === null)
+    {
+        localStorage.setItem("alertFrequency", settings.alertFrequency);
+    }
 
     window.location.href = "navigator.html";
 }
