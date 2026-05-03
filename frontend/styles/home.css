@@ -137,14 +137,20 @@ header
     margin: 5px 0;
     font-size: 1.6rem;
     font-weight: 800;
+    text-transform: uppercase;
 }
 
 .card-description
 {
     color: var(--text-black);
     margin: 0;
-    font-size: 1rem;
+    text-align: center;
+    font-size: 0.8rem;
     max-width: 250px;
+    text-transform: lowercase;
+    font-family: 'Inter', system-ui, sans-serif;
+    letter-spacing: 0.1em;
+    line-height: 1;
 }
 
 .hidden
