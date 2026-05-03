@@ -8,108 +8,173 @@
     * { margin: 0; padding: 0; box-sizing: border-box; }
 
     body {
-      background-color: #085041;
+      background-color: #1a1a1a;
       color: white;
       font-family: Arial, sans-serif;
       min-height: 100vh;
-      padding: 24px;
-    }
-
-    #status-bar {
-      font-size: 14px;
-      color: #a8d5c2;
-      margin-bottom: 8px;
-    }
-
-    h1 {
-      font-size: 28px;
-      font-weight: bold;
-      margin-bottom: 4px;
-    }
-
-    #subtitle {
-      font-size: 14px;
-      color: #a8d5c2;
-      margin-bottom: 24px;
-    }
-
-    #direction-box {
-      background-color: #0a6b55;
-      border-radius: 12px;
       padding: 20px;
-      margin-bottom: 16px;
     }
 
-    #direction-label {
-      font-size: 13px;
-      color: #a8d5c2;
-      margin-bottom: 6px;
+    /* ── TOP BAR ── */
+    #top-bar {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      margin-bottom: 20px;
     }
 
-    #direction-text {
+    #back-btn {
+      position: absolute;
+      left: 0;
+      background: none;
+      border: none;
+      color: white;
       font-size: 22px;
-      font-weight: bold;
-      line-height: 1.3;
+      cursor: pointer;
     }
 
-    #hazard-box {
-      background-color: #8B0000;
-      border-radius: 12px;
-      padding: 16px;
-      margin-bottom: 24px;
-      display: none;
-    }
-
-    #hazard-label {
-      font-size: 13px;
-      color: #ffaaaa;
-      margin-bottom: 4px;
-    }
-
-    #hazard-text {
+    #top-title {
+      color: #4CAF50;
       font-size: 16px;
       font-weight: bold;
     }
 
+    /* ── VOICEOVER CONTROLS ── */
+    #voiceover-box {
+      background-color: #FFC107;
+      border-radius: 16px;
+      padding: 16px;
+      margin-bottom: 20px;
+    }
+
+    #voiceover-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    #voiceover-title {
+      font-size: 16px;
+      font-weight: bold;
+      color: #1a1a1a;
+    }
+
+    #speaker-btn {
+      background-color: #4CAF50;
+      border: none;
+      border-radius: 8px;
+      width: 36px;
+      height: 36px;
+      font-size: 18px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    #volume-btns {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 8px;
+    }
+
+    .vol-btn {
+      background-color: #1a1a1a;
+      border: none;
+      border-radius: 8px;
+      padding: 12px;
+      color: #FFC107;
+      font-size: 14px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .vol-btn.active {
+      background-color: #90CAF9;
+      color: #1a1a1a;
+    }
+
+    /* ── DIRECTION BOX ── */
+    #direction-box {
+      background-color: #FFC107;
+      border-radius: 20px;
+      padding: 40px 24px;
+      text-align: center;
+      margin-bottom: 16px;
+    }
+
+    #direction-arrow {
+      font-size: 48px;
+      margin-bottom: 16px;
+      display: block;
+    }
+
+    #direction-text {
+      font-size: 24px;
+      font-weight: bold;
+      color: #1a1a1a;
+      margin-bottom: 6px;
+    }
+
+    #direction-sub {
+      font-size: 14px;
+      color: #555;
+    }
+
+    /* ── HAZARD BANNER ── */
+    #hazard-banner {
+      background-color: #D32F2F;
+      border-radius: 12px;
+      padding: 16px 20px;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      display: none;
+    }
+
+    #hazard-banner.visible {
+      display: flex;
+    }
+
+    #hazard-banner-text {
+      color: #FFC107;
+      font-size: 15px;
+      font-weight: bold;
+    }
+
+    /* ── 4 ACTION BUTTONS ── */
     #buttons-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 12px;
-      margin-bottom: 24px;
     }
 
     .action-btn {
-      background-color: #0a6b55;
+      background-color: #FFC107;
       border: none;
-      border-radius: 12px;
-      padding: 24px 12px;
-      color: white;
-      font-size: 16px;
+      border-radius: 16px;
+      padding: 28px 12px;
+      color: #1a1a1a;
+      font-size: 14px;
       font-weight: bold;
       cursor: pointer;
       text-align: center;
-      line-height: 1.4;
     }
 
     .action-btn:active {
-      background-color: #064d3d;
+      background-color: #FFB300;
     }
 
     .action-btn .icon {
-      font-size: 28px;
+      font-size: 26px;
       display: block;
       margin-bottom: 8px;
     }
 
-    #call-btn {
-      background-color: #c0392b;
-    }
-
-    #call-btn:active {
-      background-color: #922b21;
-    }
-
-    /* screen reader only — invisible but readable by VoiceOver */
+    /* screen reader only */
     #hazard-announcement {
       position: absolute;
       width: 1px;
@@ -121,79 +186,122 @@
 </head>
 <body>
 
-  <!-- Screen reader live region -->
   <div id="hazard-announcement" aria-live="assertive" aria-atomic="true"></div>
 
-  <div id="status-bar">🟢 Navigator Mode Active</div>
-  <h1>Navigator Mode</h1>
-  <p id="subtitle">Voice-first navigation for visually impaired users</p>
-
-  <!-- Current direction -->
-  <div id="direction-box" role="status" aria-label="Current direction">
-    <div id="direction-label">Current Direction</div>
-    <div id="direction-text">Waiting for route...</div>
+  <!-- Top bar -->
+  <div id="top-bar">
+    <button id="back-btn" aria-label="Go back" onclick="history.back()">←</button>
+    <span id="top-title">Voice Navigator Active</span>
   </div>
 
-  <!-- Hazard alert (hidden until triggered) -->
-  <div id="hazard-box" role="alert" aria-label="Hazard alert">
-    <div id="hazard-label">⚠️ Hazard Ahead</div>
-    <div id="hazard-text"></div>
+  <!-- Voiceover controls -->
+  <div id="voiceover-box">
+    <div id="voiceover-header">
+      <span id="voiceover-title">Voiceover Controls</span>
+      <button id="speaker-btn" aria-label="Toggle voice" onclick="toggleVoice()">🔊</button>
+    </div>
+    <div id="volume-btns">
+      <button class="vol-btn" id="vol-low"
+        aria-label="Minimal alerts"
+        onclick="setFrequency('low')">Minimal</button>
+        <button class="vol-btn" id="vol-medium"
+        aria-label="Normal alerts"
+        onclick="setFrequency('medium')">Normal</button>
+        <button class="vol-btn active" id="vol-high"
+        aria-label="All alerts"
+        onclick="setFrequency('high')">All Alerts</button>
+    </div>
+  </div>
+
+  <!-- Direction card -->
+  <div id="direction-box" role="status" aria-label="Current direction">
+    <span id="direction-arrow">↓</span>
+    <div id="direction-text">Waiting for route...</div>
+    <div id="direction-sub">Following accessible route</div>
+  </div>
+
+  <!-- Hazard banner (hidden until triggered) -->
+  <div id="hazard-banner" role="alert">
+    <span>⚠️</span>
+    <span id="hazard-banner-text">Cracked sidewalk — 80 ft ahead</span>
   </div>
 
   <!-- 4 quick-action buttons -->
   <div id="buttons-grid">
     <button class="action-btn"
-            aria-label="Repeat last direction"
+            aria-label="Repeat directions"
             onclick="repeatDirection()">
-      <span class="icon">🔁</span>
-      Repeat
+      <span class="icon">🔉</span>
+      Repeat directions
     </button>
 
     <button class="action-btn"
-            aria-label="What hazards are nearby"
+            aria-label="What's nearby"
             onclick="whatsNearby()">
       <span class="icon">📍</span>
-      What's Nearby
+      What's nearby
     </button>
 
     <button class="action-btn"
-            aria-label="Report a hazard"
+            aria-label="Report hazard here"
             onclick="window.location.href='report.html'">
-      <span class="icon">🚨</span>
-      Report Hazard
+      <span class="icon">⚠️</span>
+      Report hazard here
     </button>
 
-    <button class="action-btn" id="call-btn"
+    <button class="action-btn"
             aria-label="Call for help"
             onclick="callForHelp()">
       <span class="icon">📞</span>
-      Call for Help
+      Call for help
     </button>
   </div>
 
   <script src="js/voice.js"></script>
   <script>
-    // Last spoken direction — stored so Repeat button works
     let lastDirection = "Waiting for route...";
+    let voiceEnabled = true;
+    let currentVolume = 1.0;
 
-    // Called by voice.js or map.js when a new direction step is ready
-    function setDirection(text) {
-      lastDirection = text;
-      document.getElementById("direction-text").textContent = text;
-      speakDirection(text);
+    function setFrequency(level) {
+        currentVolume = level; // 'low', 'medium', 'high'
+        localStorage.setItem("alertFrequency", level);
+
+        ["low", "medium", "high"].forEach(l => {
+        document.getElementById("vol-" + l).classList.toggle("active", l === level);
+        });
+
+        const labels = {
+            low:    "Minimal alerts. High urgency hazards only.",
+            medium: "Normal alerts. High and medium urgency hazards.",
+            high:   "All alerts. Every hazard will be announced",
+        };
+        speakAlert(labels[level]);
     }
 
-    // Called by voice.js when a hazard is within 300ft
-    function showHazardAlert(hazard, distFt) {
-      const text = (hazard.alert_text || "Hazard ahead.")
-                 + " In " + Math.round(distFt) + " feet.";
-      document.getElementById("hazard-text").textContent = text;
-      document.getElementById("hazard-box").style.display = "block";
-      announceHazard({ alert_text: text });
+    function toggleVoice() {
+      voiceEnabled = !voiceEnabled;
+      document.getElementById("speaker-btn").textContent = voiceEnabled ? "🔊" : "🔇";
+      if (voiceEnabled) speakAlert("Voice alerts on");
+    }
+
+    function setDirection(text, arrow = "↓") {
+      lastDirection = text;
+      document.getElementById("direction-text").textContent = text;
+      document.getElementById("direction-arrow").textContent = arrow;
+      if (voiceEnabled) speakDirection(text);
+    }
+
+    function showHazardBanner(text) {
+      document.getElementById("hazard-banner-text").textContent = text;
+      document.getElementById("hazard-banner").classList.add("visible");
+      const announcement = document.getElementById("hazard-announcement");
+      if (announcement) announcement.textContent = text;
+      if (voiceEnabled) speakAlert(text);
     }
 
     function repeatDirection() {
-      speakAlert(lastDirection);
+      if (voiceEnabled) speakAlert(lastDirection);
     }
 
     function whatsNearby() {
@@ -201,17 +309,14 @@
         speakAlert("No hazards reported nearby.");
         return;
       }
-      const count = window.hazards.filter(h => !h.alerted).length;
-      speakAlert(count + " hazards reported in this area. Nearest hazard: "
-        + (window.hazards[0].alert_text || "unknown hazard"));
+      const count = window.hazards.length;
+      speakAlert(count + " hazards nearby. Nearest: " + window.hazards[0].alert_text);
     }
 
     function callForHelp() {
       speakAlert("Calling for help. Please stay where you are.");
-      // In production: window.location.href = "tel:911";
     }
 
-    // Start GPS proximity watching when page loads
     window.addEventListener("load", () => {
       watchUserLocation();
     });

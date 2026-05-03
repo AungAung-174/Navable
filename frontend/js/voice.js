@@ -89,16 +89,22 @@ function watchUserLocation() {
 }
 
 function checkNearbyHazards(userLat, userLng) {
-  if (!window.hazards) return; // hazards not loaded yet
+  if (!window.hazards) return;
+
+  const frequency = localStorage.getItem("alertFrequency") || "high";
 
   window.hazards.forEach((h) => {
     const dist = getDistanceFt(userLat, userLng, h.lat, h.lng);
+
+    // Filter by frequency setting
+    if (frequency === "low" && h.urgency !== "high") return;
+    if (frequency === "medium" && h.urgency === "low") return;
 
     if (dist < 300 && !h.alerted) {
       const text = (h.alert_text || ALERTS[h.hazard_type] || ALERTS.other)
                  + " In " + Math.round(dist) + " feet.";
       speakAlert(text);
-      h.alerted = true; // don't repeat the same hazard
+      h.alerted = true;
     }
   });
 }
