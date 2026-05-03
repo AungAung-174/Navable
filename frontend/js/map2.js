@@ -57,14 +57,17 @@ function initMap() {
 
   directionsService = new google.maps.DirectionsService();
   directionsRenderer = new google.maps.DirectionsRenderer({
-    map,
+    map: map,
     suppressMarkers: false,
+    preserveViewport: false,
     polylineOptions: {
-      strokeColor: "#FFC107",
-      strokeWeight: 5,
-      strokeOpacity: 0.9,
+      strokeColor: "#FFFF00",
+      strokeWeight: 8,
+      strokeOpacity: 1.0,
+      zIndex: 9999,
     },
   });
+
 
   fetchHazards();
   setInterval(fetchHazards, 10000);
@@ -213,24 +216,28 @@ function showRoute(destinationText) {
     return;
   }
 
-  const origin = userMarker
-    ? {
-        lat: userMarker.getPosition().lat(),
-        lng: userMarker.getPosition().lng(),
-      }
-    : DEMO_ORIGIN;
+  lastDestination = destinationText;
+
+  const origin = DEMO_ORIGIN;
+
+  console.log("Routing from:", origin);
+  console.log("Routing to:", destination);
+
+  directionsRenderer.setMap(map);
 
   directionsService.route(
     {
-      origin,
-      destination,
+      origin: origin,
+      destination: destination,
       travelMode: google.maps.TravelMode.WALKING,
     },
     (result, status) => {
       console.log("Directions status:", status);
+      console.log("Directions result:", result);
 
       if (status === "OK") {
         directionsRenderer.setDirections(result);
+
         currentRoute = result;
         currentStep = 0;
         navigationActive = true;
@@ -239,13 +246,17 @@ function showRoute(destinationText) {
         const leg = result.routes[0].legs[0];
         const step = stripHtml(leg.steps[0].instructions);
 
+        map.fitBounds(result.routes[0].bounds);
+
         setDirectionText(step);
         speakAlert(`Route found. ${leg.duration.text} away. ${step}`);
 
         checkHazardsOnRoute();
-        startRealTimeNavigation();
+
+        // For demo, do not start live GPS tracking yet.
+        // startRealTimeNavigation();
       } else {
-        speakAlert("Could not find a route. Check console for the Directions status.");
+        speakAlert("Could not find a route. Status: " + status);
         setDirectionText("Could not find a route: " + status);
       }
     }
