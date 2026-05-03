@@ -207,6 +207,16 @@
     <div id="location-label">Auto-detected location</div>
     <div id="location-text">Detecting location...</div>
   </div>
+  <div class="section-title">Demo hazard location</div>
+  <select id="demo-location-select"
+          onchange="selectDemoLocation(this.value)"
+          style="width: 100%; background-color: #1a1a1a; border: 2px solid #FFC107; border-radius: 14px; padding: 14px; color: #FFC107; font-size: 15px; margin-bottom: 8px;">
+    <option value="">Use current GPS location</option>
+    <option value="kelley_to_mu_1">Kelley → MU path</option>
+    <option value="mu_to_valley_1">MU → Valley Library path</option>
+    <option value="mu_to_dixon_1">MU → Dixon path</option>
+  </select>
+
 
   <!-- Hazard type -->
   <div class="section-title">Hazard type</div>
@@ -256,6 +266,12 @@
     <div id="pin-text">Tap to adjust pin on map</div>
   </div>
 
+  <div class="section-title">Photo evidence</div>
+  <input id="photo-input"
+       type="file"
+       accept="image/*"
+       style="width: 100%; background-color: #1a1a1a; border: 2px solid #FFC107; border-radius: 14px; padding: 14px; color: #FFC107; margin-bottom: 16px;" />
+
   <!-- Notes -->
   <div class="section-title">Notes (optional)</div>
 
@@ -279,11 +295,33 @@
     Submit report
   </button>
 
+  <script src="js/config.js"></script>
+
   <script>
     let selectedHazard = null;
     let userLat = null;
     let userLng = null;
     let pinConfirmed = false;
+
+    const DEMO_REPORT_LOCATIONS = {
+      kelley_to_mu_1: {
+        lat: 44.56555,
+        lng: -123.27895,
+        label: "Kelley to MU path"
+      },
+      mu_to_valley_1: {
+        lat: 44.56495,
+        lng: -123.27760,
+        label: "MU to Valley Library path"
+      },
+      mu_to_dixon_1: {
+        lat: 44.56295,
+        lng: -123.27920,
+        label: "MU to Dixon path"
+      }
+
+    };
+
 
     window.addEventListener("load", () => {
         const contrast  = localStorage.getItem("highContrast") === "true";
@@ -344,6 +382,22 @@
         }
     });
 
+    function selectDemoLocation(value) {
+      if (!value) return;
+
+      const location = DEMO_REPORT_LOCATIONS[value];
+      userLat = location.lat;
+      userLng = location.lng;
+      pinConfirmed = true;
+
+      document.getElementById("location-text").textContent =
+        `${location.label}: ${userLat.toFixed(5)}, ${userLng.toFixed(5)}`;
+
+      document.getElementById("pin-text").textContent = "Demo pin set";
+      document.getElementById("pin-icon").textContent = "✅";
+    }
+
+
     function selectHazard(btn) {
         document.querySelectorAll(".hazard-btn").forEach(b => {
             b.classList.remove("selected");
@@ -401,9 +455,15 @@
         formData.append("lng",         userLng || -123.2794);
         formData.append("hazard_type", selectedHazard);
         formData.append("description", document.getElementById("notes-input").value);
+        const photo = document.getElementById("photo-input").files[0];
+        if (photo) {
+          formData.append("photo", photo);
+        }
+
 
         try {
-            const res = await fetch("http://localhost:5000/report", {
+            const res = await fetch(`${API_BASE}/report`, {
+
                 method: "POST",
                 body: formData,
             });

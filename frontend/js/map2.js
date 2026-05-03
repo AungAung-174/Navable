@@ -351,7 +351,7 @@ function checkHazardsOnRoute() {
   if (!currentRoute || !currentRoute.routes.length) return;
 
   const routePath = currentRoute.routes[0].overview_path;
-  const routeThreshold = 55;
+  const routeThreshold = 120;
 
   (window.hazards || []).forEach(hazard => {
     const distance = distanceToRouteMeters(hazard, routePath);
