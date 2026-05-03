@@ -13,6 +13,7 @@ window.hazards = [];
 function initMap()
 {
     const osu = { lat: 44.5638, lng: -123.2797 };
+
     map = new google.maps.Map(document.getElementById("map"),
     {
         zoom: 16,
@@ -21,7 +22,12 @@ function initMap()
         disableDefaultUI: true,
         zoomControl: true,
     });
+
+    loadHazards();
 }
+
+window.initMap = initMap;
+
 
 async function loadHazards()
 {
