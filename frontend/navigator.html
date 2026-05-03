@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ClearPath — Navigator Mode</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background-color: #1a1a1a;
+      color: white;
+      font-family: Arial, sans-serif;
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    /* ── TOP BAR ── */
+    #top-bar {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      margin-bottom: 20px;
+    }
+
+    #back-btn {
+      position: absolute;
+      left: 0;
+      background: none;
+      border: none;
+      color: white;
+      font-size: 22px;
+      cursor: pointer;
+    }
+
+    #top-title {
+      color: #4CAF50;
+      font-size: 16px;
+      font-weight: bold;
+    }
+
+    /* ── VOICEOVER CONTROLS ── */
+    #voiceover-box {
+      background-color: #FFC107;
+      border-radius: 16px;
+      padding: 16px;
+      margin-bottom: 20px;
+    }
+
+    #voiceover-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    #voiceover-title {
+      font-size: 16px;
+      font-weight: bold;
+      color: #1a1a1a;
+    }
+
+    #speaker-btn {
+      background-color: #4CAF50;
+      border: none;
+      border-radius: 8px;
+      width: 36px;
+      height: 36px;
+      font-size: 18px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    #volume-btns {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 8px;
+    }
+
+    .vol-btn {
+      background-color: #1a1a1a;
+      border: none;
+      border-radius: 8px;
+      padding: 12px;
+      color: #FFC107;
+      font-size: 14px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .vol-btn.active {
+      background-color: #90CAF9;
+      color: #1a1a1a;
+    }
+
+    /* ── DIRECTION BOX ── */
+    #direction-box {
+      background-color: #FFC107;
+      border-radius: 20px;
+      padding: 40px 24px;
+      text-align: center;
+      margin-bottom: 16px;
+    }
+
+    #direction-arrow {
+      font-size: 48px;
+      margin-bottom: 16px;
+      display: block;
+    }
+
+    #direction-text {
+      font-size: 24px;
+      font-weight: bold;
+      color: #1a1a1a;
+      margin-bottom: 6px;
+    }
+
+    #direction-sub {
+      font-size: 14px;
+      color: #555;
+    }
+
+    /* ── HAZARD BANNER ── */
+    #hazard-banner {
+      background-color: #D32F2F;
+      border-radius: 12px;
+      padding: 16px 20px;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      display: none;
+    }
+
+    #hazard-banner.visible {
+      display: flex;
+    }
+
+    #hazard-banner-text {
+      color: #FFC107;
+      font-size: 15px;
+      font-weight: bold;
+    }
+
+    /* ── 4 ACTION BUTTONS ── */
+    #buttons-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .action-btn {
+      background-color: #FFC107;
+      border: none;
+      border-radius: 16px;
+      padding: 28px 12px;
+      color: #1a1a1a;
+      font-size: 14px;
+      font-weight: bold;
+      cursor: pointer;
+      text-align: center;
+    }
+
+    .action-btn:active {
+      background-color: #FFB300;
+    }
+
+    .action-btn .icon {
+      font-size: 26px;
+      display: block;
+      margin-bottom: 8px;
+    }
+
+    /* screen reader only */
+    #hazard-announcement {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      clip: rect(0,0,0,0);
+    }
+  </style>
+</head>
+<body>
+
+  <div id="hazard-announcement" aria-live="assertive" aria-atomic="true"></div>
+
+  <!-- Top bar -->
+  <div id="top-bar">
+    <button id="back-btn" aria-label="Go back" onclick="history.back()">←</button>
+    <span id="top-title">Voice Navigator Active</span>
+  </div>
+
+  <!-- Voiceover controls -->
+  <div id="voiceover-box">
+    <div id="voiceover-header">
+      <span id="voiceover-title">Voiceover Controls</span>
+      <button id="speaker-btn" aria-label="Toggle voice" onclick="toggleVoice()">🔊</button>
+    </div>
+    <div id="volume-btns">
+      <button class="vol-btn" id="vol-low"
+        aria-label="Minimal alerts"
+        onclick="setFrequency('low')">Minimal</button>
+        <button class="vol-btn" id="vol-medium"
+        aria-label="Normal alerts"
+        onclick="setFrequency('medium')">Normal</button>
+        <button class="vol-btn active" id="vol-high"
+        aria-label="All alerts"
+        onclick="setFrequency('high')">All Alerts</button>
+    </div>
+  </div>
+
+  <!-- Direction card -->
+  <div id="direction-box" role="status" aria-label="Current direction">
+    <span id="direction-arrow">↓</span>
+    <div id="direction-text">Waiting for route...</div>
+    <div id="direction-sub">Following accessible route</div>
+  </div>
+
+  <!-- Hazard banner (hidden until triggered) -->
+  <div id="hazard-banner" role="alert">
+    <span>⚠️</span>
+    <span id="hazard-banner-text">Cracked sidewalk — 80 ft ahead</span>
+  </div>
+
+  <!-- 4 quick-action buttons -->
+  <div id="buttons-grid">
+    <button class="action-btn"
+            aria-label="Repeat directions"
+            onclick="repeatDirection()">
+      <span class="icon">🔉</span>
+      Repeat directions
+    </button>
+
+    <button class="action-btn"
+            aria-label="What's nearby"
+            onclick="whatsNearby()">
+      <span class="icon">📍</span>
+      What's nearby
+    </button>
+
+    <button class="action-btn"
+            aria-label="Report hazard here"
+            onclick="window.location.href='report.html'">
+      <span class="icon">⚠️</span>
+      Report hazard here
+    </button>
+
+    <button class="action-btn"
+            aria-label="Call for help"
+            onclick="callForHelp()">
+      <span class="icon">📞</span>
+      Call for help
+    </button>
+  </div>
+
+  <script src="js/voice.js"></script>
+  <script>
+    let lastDirection = "Waiting for route...";
+    let voiceEnabled = true;
+    let currentVolume = 1.0;
+
+    function setFrequency(level) {
+        currentVolume = level; // 'low', 'medium', 'high'
+        localStorage.setItem("alertFrequency", level);
+
+        ["low", "medium", "high"].forEach(l => {
+        document.getElementById("vol-" + l).classList.toggle("active", l === level);
+        });
+
+        const labels = {
+            low:    "Minimal alerts. High urgency hazards only.",
+            medium: "Normal alerts. High and medium urgency hazards.",
+            high:   "All alerts. Every hazard will be announced",
+        };
+        speakAlert(labels[level]);
+    }
+
+    function toggleVoice() {
+      voiceEnabled = !voiceEnabled;
+      document.getElementById("speaker-btn").textContent = voiceEnabled ? "🔊" : "🔇";
+      if (voiceEnabled) speakAlert("Voice alerts on");
+    }
+
+    function setDirection(text, arrow = "↓") {
+      lastDirection = text;
+      document.getElementById("direction-text").textContent = text;
+      document.getElementById("direction-arrow").textContent = arrow;
+      if (voiceEnabled) speakDirection(text);
+    }
+
+    function showHazardBanner(text) {
+      document.getElementById("hazard-banner-text").textContent = text;
+      document.getElementById("hazard-banner").classList.add("visible");
+      const announcement = document.getElementById("hazard-announcement");
+      if (announcement) announcement.textContent = text;
+      if (voiceEnabled) speakAlert(text);
+    }
+
+    function repeatDirection() {
+      if (voiceEnabled) speakAlert(lastDirection);
+    }
+
+    function whatsNearby() {
+      if (!window.hazards || window.hazards.length === 0) {
+        speakAlert("No hazards reported nearby.");
+        return;
+      }
+      const count = window.hazards.length;
+      speakAlert(count + " hazards nearby. Nearest: " + window.hazards[0].alert_text);
+    }
+
+    function callForHelp() {
+      speakAlert("Calling for help. Please stay where you are.");
+    }
+
+    window.addEventListener("load", () => {
+      watchUserLocation();
+    });
+  </script>
+
+</body>
+</html>
