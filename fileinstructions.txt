@@ -1,0 +1,169 @@
+# ClearPath
+
+**Accessible hazard navigation app for wheelchair users and visually impaired students.**
+
+BeaverHacks 2026 · Social Impact Track · Oregon State University
+
+---
+
+## The Problem
+
+People who use wheelchairs or are visually impaired navigate the same sidewalks every day with zero advance warning of what's ahead. A blocked ramp, a Starship robot parked on a curb cut, cracked pavement, or construction — Google Maps doesn't tell you any of this. These people find out only when they arrive.
+
+## The Solution
+
+ClearPath is a crowdsourced hazard reporting and accessible navigation mobile app built with React Native + Expo. Any student reports a hazard in under 10 seconds. Gemini analyzes it. A pin appears on the live map. Nearby wheelchair and visually impaired users get an automatic voice alert — before they reach the obstacle.
+
+---
+
+## Tech Stack
+
+| Layer | Technology | Purpose |
+|---|---|---|
+| Mobile app | React Native + Expo | Cross-platform iOS & Android |
+| Map | react-native-maps | Campus map with custom hazard pins |
+| Navigation | expo-router | Screen routing |
+| Road data | Waze API | Real-time road hazards as background layer |
+| AI triage | Google Gemini Vision API | Photo → hazard type + urgency + alert text |
+| Database | Firebase Firestore | Real-time sync of all reports |
+| Backend | Python (Flask) | API server handling Gemini + Firebase |
+| Voice | expo-speech | Reads hazard alerts aloud |
+| Location | expo-location | GPS tracking and proximity detection |
+| Accessibility | React Native Accessibility API | Screen reader support throughout |
+
+---
+
+## Project Structure
+
+```
+clearpath/
+├── backend/
+│   ├── app.py                  # Flask API server
+│   ├── requirements.txt        # Python dependencies
+│   └── serviceAccountKey.json  # Firebase credentials (never commit this)
+│
+├── app/                        # Expo Router screens
+│   ├── index.tsx               # Onboarding — disability type selector
+│   ├── map.tsx                 # Live hazard map (main screen)
+│   ├── report.tsx              # Report a hazard form
+│   ├── navigator.tsx           # ← Taichi: visually impaired voice-first mode
+│   ├── settings.tsx            # ← Taichi: accessibility settings
+│   └── confirmed.tsx           # ← Taichi: report confirmed + impact screen
+│
+├── components/
+│   ├── HazardPin.tsx           # Map pin component
+│   ├── VoiceAlert.tsx          # ← Taichi: voice alert UI component
+│   └── NavBar.tsx              # Bottom navigation bar
+│
+├── hooks/
+│   ├── useVoice.ts             # ← Taichi: expo-speech logic
+│   ├── useLocation.ts          # ← Taichi: GPS + proximity detection
+│   └── useHazards.ts           # Firebase real-time listener
+│
+├── .gitignore
+└── README.md
+```
+
+---
+
+## Team & Roles
+
+| Name | Role | Files |
+|---|---|---|
+| Backend dev | Python + Flask + Firebase + Gemini | `backend/app.py` |
+| Frontend dev | React Native + Maps + Routing | `app/map.tsx`, `app/report.tsx`, `app/index.tsx`, `hooks/useHazards.ts` |
+| Taichi | expo-speech + expo-location + Accessibility | `hooks/useVoice.ts`, `hooks/useLocation.ts`, `app/navigator.tsx`, `app/settings.tsx`, `app/confirmed.tsx`, `components/VoiceAlert.tsx` |
+| Zakia | Product + Pitch + UX | Figma designs, pitch deck, hazard seeding, demo script |
+
+---
+
+## Getting Started
+
+### Prerequisites
+
+- Node.js 18+
+- Expo Go app installed on your phone (iOS or Android)
+
+### Setup
+
+```bash
+# Clone the repo
+git clone https://github.com/your-team/clearpath.git
+cd clearpath
+
+# Install dependencies
+npm install
+
+# Install Expo-specific packages
+npx expo install expo-speech expo-location expo-router react-native-maps
+
+# Start the dev server
+npx expo start
+```
+
+Scan the QR code with Expo Go on your phone to run the app instantly.
+
+### Backend
+
+```bash
+cd backend
+pip install flask firebase-admin google-generativeai python-dotenv requests flask-cors
+python app.py
+```
+
+---
+
+## Environment Variables
+
+Create a `.env` file in `/backend`:
+
+```
+GEMINI_API_KEY=your_key_here
+```
+
+Get your Gemini API key from [aistudio.google.com](https://aistudio.google.com).
+
+Get your Firebase config from [console.firebase.google.com](https://console.firebase.google.com).
+
+**Never commit `serviceAccountKey.json` or `.env` to GitHub.**
+
+---
+
+## Branch Strategy
+
+```
+main                        # stable, demo-ready code only
+├── feature/voice-alerts    # Taichi
+├── feature/map-pins        # Frontend dev
+└── feature/flask-api       # Backend dev
+```
+
+1. Create your branch: `git checkout -b feature/voice-alerts`
+2. Work and commit on your branch
+3. Open a Pull Request to merge into `main`
+
+---
+
+## App Screens
+
+| Screen | File | Owner |
+|---|---|---|
+| Onboarding | `app/index.tsx` | Frontend dev |
+| Live hazard map | `app/map.tsx` | Frontend dev |
+| Report a hazard | `app/report.tsx` | Frontend dev |
+| Navigator mode (VI) | `app/navigator.tsx` | Taichi |
+| Settings | `app/settings.tsx` | Taichi |
+| Report confirmed | `app/confirmed.tsx` | Taichi |
+
+---
+
+## Data Sources
+
+- **Users** — ADA-specific hazard reports (ramps, robots, cracks) submitted directly in the app
+- **Waze API** — road closures, construction, accidents as a background layer
+- **OpenSidewalks** — sidewalk width, surface, and slope data for the Seattle/UW area
+- **Team** — manually seed 8–10 real OSU campus hazards before judging starts
+
+---
+
+*ClearPath · BeaverHacks 2026*
