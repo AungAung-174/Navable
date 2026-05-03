@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ClearPath — Report a Hazard</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background-color: #1a1a1a;
+      color: white;
+      font-family: Arial, sans-serif;
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    /* ── TOP BAR ── */
+    #top-bar {
+      display: flex;
+      align-items: center;
+      margin-bottom: 24px;
+    }
+
+    #back-btn {
+      background: none;
+      border: none;
+      color: #FFC107;
+      font-size: 22px;
+      cursor: pointer;
+      margin-right: 12px;
+    }
+
+    #top-title {
+      color: #FFC107;
+      font-size: 20px;
+      font-weight: bold;
+    }
+
+    /* ── SECTION TITLE ── */
+    .section-title {
+      font-size: 18px;
+      font-weight: bold;
+      color: #FFC107;
+      margin-bottom: 12px;
+      margin-top: 20px;
+    }
+
+    /* ── LOCATION BOX ── */
+    #location-box {
+      background-color: #FFC107;
+      border-radius: 14px;
+      padding: 16px 18px;
+      margin-bottom: 8px;
+    }
+
+    #location-label {
+      font-size: 12px;
+      color: #555;
+      margin-bottom: 4px;
+    }
+
+    #location-text {
+      font-size: 16px;
+      font-weight: bold;
+      color: #1a1a1a;
+    }
+
+    /* ── HAZARD GRID ── */
+    #hazard-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 8px;
+    }
+
+    .hazard-btn {
+      background-color: #2a2a2a;
+      border: 2px solid transparent;
+      border-radius: 14px;
+      padding: 20px 12px;
+      text-align: center;
+      cursor: pointer;
+      color: #FFC107;
+      font-size: 14px;
+      font-weight: bold;
+    }
+
+    .hazard-btn .hazard-icon {
+      font-size: 32px;
+      display: block;
+      margin-bottom: 8px;
+    }
+
+    .hazard-btn.selected {
+      border-color: #1a1a1a;
+      background-color: #E6AC00;
+    }
+
+    /* ── PIN MAP BOX ── */
+    #pin-box {
+      background-color: #1a1a1a;
+      border: 2px solid #FFC107;
+      border-radius: 14px;
+      padding: 32px;
+      text-align: center;
+      cursor: pointer;
+      margin-bottom: 8px;
+    }
+
+    #pin-icon {
+      font-size: 36px;
+      display: block;
+      margin-bottom: 8px;
+      color: #FFC107;
+    }
+
+    #pin-text {
+      font-size: 14px;
+      color: #aaa;
+    }
+
+    /* ── NOTES ── */
+    #notes-input {
+      width: 100%;
+      background-color: #1a1a1a;
+      border: 2px solid #FFC107;
+      border-radius: 14px;
+      padding: 16px;
+      color: #FFC107;
+      font-size: 14px;
+      font-family: Arial, sans-serif;
+      resize: vertical;
+      min-height: 100px;
+      margin-bottom: 24px;
+    }
+
+    #notes-input::placeholder {
+      color: #FFC107;
+      opacity: 0.6;
+    }
+
+    /* ── SUBMIT BUTTON ── */
+    #submit-btn {
+      width: 100%;
+      background-color: #90CAF9;
+      border: none;
+      border-radius: 14px;
+      padding: 18px;
+      font-size: 18px;
+      font-weight: bold;
+      color: #1a1a1a;
+      cursor: pointer;
+      margin-bottom: 32px;
+    }
+
+    #submit-btn:active {
+      background-color: #64B5F6;
+    }
+
+    #submit-btn:disabled {
+      background-color: #444;
+      color: #888;
+      cursor: not-allowed;
+    }
+    .hazard-btn:active {
+        transform: scale(0.96);
+    }
+
+    .hazard-btn.selected {
+        border-color: #FFC107;
+        background-color: #2a2200;
+        color: #FFC107;
+        outline: 3px solid #FFC107;
+        outline-offset: 2px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top bar -->
+  <div id="top-bar">
+    <button id="back-btn" aria-label="Go back" onclick="history.back()">←</button>
+    <span id="top-title">Report a hazard</span>
+  </div>
+
+  <!-- Auto-detected location -->
+  <div id="location-box">
+    <div id="location-label">Auto-detected location</div>
+    <div id="location-text">Detecting location...</div>
+  </div>
+
+  <!-- Hazard type -->
+  <div class="section-title">Hazard type</div>
+  <div id="hazard-grid">
+    <button class="hazard-btn" data-type="uneven_surface"
+            aria-label="Uneven surface"
+            onclick="selectHazard(this)">
+      <span class="hazard-icon">🪨</span>
+      Uneven surface
+    </button>
+    <button class="hazard-btn" data-type="robot"
+            aria-label="Stuck robot"
+            onclick="selectHazard(this)">
+      <span class="hazard-icon">🤖</span>
+      Stuck robot
+    </button>
+    <button class="hazard-btn" data-type="construction"
+            aria-label="Construction"
+            onclick="selectHazard(this)">
+      <span class="hazard-icon">⚠️</span>
+      Construction
+    </button>
+    <button class="hazard-btn" data-type="broken_sidewalk"
+            aria-label="Broken path"
+            onclick="selectHazard(this)">
+      <span class="hazard-icon">🕳️</span>
+      Broken path
+    </button>
+    <button class="hazard-btn" data-type="vehicle"
+            aria-label="Vehicle block"
+            onclick="selectHazard(this)">
+      <span class="hazard-icon">🚗</span>
+      Vehicle block
+    </button>
+    <button class="hazard-btn" data-type="other"
+            aria-label="Other"
+            onclick="selectHazard(this)">
+      <span class="hazard-icon">📍</span>
+      Other
+    </button>
+  </div>
+
+  <!-- Pin location -->
+  <div class="section-title">Pin exact location</div>
+  <div id="pin-box" onclick="adjustPin()" aria-label="Tap to adjust pin on map">
+    <span id="pin-icon">📍</span>
+    <div id="pin-text">Tap to adjust pin on map</div>
+  </div>
+
+  <!-- Notes -->
+  <div class="section-title">Notes (optional)</div>
+  <textarea id="notes-input"
+            placeholder="Add any additional details..."
+            aria-label="Additional notes"></textarea>
+
+  <!-- Submit -->
+  <button id="submit-btn"
+          aria-label="Submit report"
+          onclick="submitReport()"
+          disabled>
+    Submit report
+  </button>
+
+  <script>
+    let selectedHazard = null;
+    let userLat = null;
+    let userLng = null;
+    let pinConfirmed = false;
+
+    window.addEventListener("load", () => {
+        const contrast  = localStorage.getItem("highContrast") === "true";
+        const largeText = localStorage.getItem("largeText")    === "true";
+
+  // Apply contrast
+        if (contrast) {
+            document.body.style.fontWeight = "bold";
+            document.querySelectorAll("*").forEach(el => {
+                el.style.fontWeight = "bold";
+            });
+            document.querySelectorAll(".hazard-btn").forEach(el => {
+                el.style.backgroundColor = "#E6AC00";
+                el.style.color = "#1a1a1a";
+                el.style.borderColor = "#1a1a1a";
+            });
+            document.getElementById("location-box").style.backgroundColor = "#E6AC00";
+            document.getElementById("top-title").style.color = "#FFC107";
+            document.getElementById("back-btn").style.color = "white";
+            document.getElementById("notes-input").style.borderColor = "#E6AC00";
+        } else {
+        // デフォルト黒基調
+            document.querySelectorAll(".hazard-btn").forEach(el => {
+                el.style.backgroundColor = "#2a2a2a";
+                el.style.color = "#FFC107";
+                el.style.borderColor = "#444";
+            });
+            document.getElementById("location-box").style.backgroundColor = "#FFC107";
+        }
+
+    // Apply large text
+        if (largeText) {
+            document.body.style.fontSize = "150%";
+            document.querySelectorAll(".hazard-btn").forEach(el => {
+                el.style.fontSize = "16px";
+            });
+            document.querySelectorAll(".section-title").forEach(el => {
+                el.style.fontSize = "22px";
+            });
+            document.getElementById("top-title").style.fontSize = "24px";
+            document.getElementById("submit-btn").style.fontSize = "20px";
+        }
+
+    // GPS
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+                (pos) => {
+                    userLat = pos.coords.latitude;
+                    userLng = pos.coords.longitude;
+                    document.getElementById("location-text").textContent =
+                        `${userLat.toFixed(5)}, ${userLng.toFixed(5)}`;
+                },
+                () => {
+                    document.getElementById("location-text").textContent =
+                        "Location unavailable";
+                }
+            );
+        }
+    });
+
+    function selectHazard(btn) {
+        document.querySelectorAll(".hazard-btn").forEach(b => {
+            b.classList.remove("selected");
+        });
+        btn.classList.add("selected");
+        selectedHazard = btn.dataset.type;
+        document.getElementById("submit-btn").disabled = false;
+
+  // Otherの時はNotesをrequiredに
+        const notesTitle = document.querySelector(".section-title:last-of-type") ||
+            [...document.querySelectorAll(".section-title")].find(el => el.textContent.includes("Notes"));
+  
+        if (selectedHazard === "other") {
+            notesTitle.textContent = "Notes (required)";
+            notesTitle.style.color = "#FF5252";
+            document.getElementById("notes-input").required = true;
+            document.getElementById("notes-input").placeholder = "Please describe the hazard...";
+        } else {
+            notesTitle.textContent = "Notes (optional)";
+            notesTitle.style.color = "#FFC107";
+            document.getElementById("notes-input").required = false;
+            document.getElementById("notes-input").placeholder = "Add any additional details...";
+        }
+    }
+
+    function adjustPin() {
+        pinConfirmed = true;
+        document.getElementById("pin-text").textContent = "Pin set at current location";
+        document.getElementById("pin-icon").textContent = "✅";
+        document.getElementById("pin-box").style.borderColor = "#FFC107";
+    }
+
+    async function submitReport() {
+        if (!selectedHazard) return;
+
+        if (selectedHazard === "other" && !document.getElementById("notes-input").value.trim()) {
+            document.getElementById("notes-input").style.borderColor = "#FF5252";
+            document.getElementById("notes-input").focus();
+            return;
+        }
+
+        if (!pinConfirmed) {
+            document.getElementById("pin-box").style.borderColor = "#FF5252";
+            document.getElementById("pin-text").textContent = "Please confirm your location first";
+            document.getElementById("pin-icon").textContent = "⚠️";
+            return;
+        }
+
+        const btn = document.getElementById("submit-btn");
+        btn.textContent = "Submitting...";
+        btn.disabled = true;
+
+        const formData = new FormData();
+        formData.append("lat",         userLat || 44.5638);
+        formData.append("lng",         userLng || -123.2794);
+        formData.append("hazard_type", selectedHazard);
+        formData.append("description", document.getElementById("notes-input").value);
+
+        try {
+            const res = await fetch("http://localhost:5000/report", {
+                method: "POST",
+                body: formData,
+            });
+            const data = await res.json();
+            if (data.success) {
+                sessionStorage.setItem("lastReport", JSON.stringify({
+                    hazard_type:  selectedHazard,
+                    urgency:      data.urgency      || "medium",
+                    alert_text:   data.alert_text   || "",
+                    nearby_count: data.nearby_count || 0,
+                }));
+                window.location.href = "confirmed.html";
+            }
+        } catch (err) {
+            sessionStorage.setItem("lastReport", JSON.stringify({
+                hazard_type:  selectedHazard,
+                urgency:      "medium",
+                alert_text:   selectedHazard.replace("_", " ") + " reported at this location.",
+                nearby_count: 4,
+            }));
+            window.location.href = "confirmed.html";
+        }
+    } 
+  </script>
+
+</body>
+</html>
