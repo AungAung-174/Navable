@@ -1,7 +1,7 @@
 :root
 {
     --bg-dark: #1a1a1a;
-    --brand-yellow: #ffcc33;
+    --brand-yellow: #FFC107;
     --text-black: #000000;
 }
 
@@ -77,11 +77,13 @@ header
 .card:hover
 {
     transform: translateY(-3px);
-    box-shadow: 4px 4px 4px ;
+    box-shadow: 4px 4px 4px black;
+    color: black;
 }
 .card:active
 {
     transform: scale(0.97);
+    color: black;
 }
 
 
