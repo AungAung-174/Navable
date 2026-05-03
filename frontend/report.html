@@ -19,22 +19,40 @@
     #top-bar {
       display: flex;
       align-items: center;
+      justify-content: space-between;
       margin-bottom: 24px;
     }
 
     #back-btn {
-      background: none;
-      border: none;
-      color: #FFC107;
+      background-color: #FFC107;
+      border: 2px solid #FFC107;
+      border-radius: 8px;
+      color: #1a1a1a;
       font-size: 22px;
       cursor: pointer;
-      margin-right: 12px;
+
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      padding: 0;
+    }
+
+    #back-btn:hover
+    {
+      transform: translateY(-3px);
+      box-shadow: 4px 4px 4px black;
+      color: black;
     }
 
     #top-title {
       color: #FFC107;
       font-size: 20px;
       font-weight: bold;
+      flex: 1;
+      text-align: center;
     }
 
     /* ── SECTION TITLE ── */
@@ -180,8 +198,8 @@
 
   <!-- Top bar -->
   <div id="top-bar">
-    <button id="back-btn" aria-label="Go back" onclick="history.back()">←</button>
-    <span id="top-title">Report a hazard</span>
+    <button id="back-btn" aria-label="Go back" onclick="history.back()">🏠︎</button>
+    <span id="top-title">Report a Hazard</span>
   </div>
 
   <!-- Auto-detected location -->

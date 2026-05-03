@@ -28,11 +28,27 @@
     #back-btn {
       position: absolute;
       left: 0;
-      background: none;
-      border: none;
-      color: white;
+      background-color: #FFC107;
+      border: 2px solid #FFC107;
+      border-radius: 8px;
+      color: #1a1a1a;
       font-size: 22px;
       cursor: pointer;
+
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      padding: 0;
+    }
+
+    #back-btn:hover
+    {
+      transform: translateY(-3px);
+      box-shadow: 4px 4px 4px black;
+      color: black;
     }
 
     #top-title {
@@ -206,7 +222,7 @@
 
   <!-- Top bar -->
   <div id="top-bar">
-    <button id="back-btn" aria-label="Go back" onclick="history.back()">←</button>
+    <button id="back-btn" aria-label="Go back" onclick="history.back()">🏠︎</button>
     <span id="top-title">Settings</span>
   </div>
 
