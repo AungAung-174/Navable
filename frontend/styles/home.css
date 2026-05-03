@@ -36,7 +36,7 @@ header
 {
     text-align: center;
     margin-top: 20px;
-    margin-bottom: 40px;
+    margin-bottom: 20px;
 }
 
 .logo-icon
@@ -55,7 +55,7 @@ header
 .app-title
 {
     color: var(--brand-yellow);
-    font-size: 2.5rem;
+    font-size: 5.5rem;
     margin: 0;
 }
 
