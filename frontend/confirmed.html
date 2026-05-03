@@ -8,124 +8,134 @@
     * { margin: 0; padding: 0; box-sizing: border-box; }
 
     body {
-      background-color: #f5f5f5;
+      background-color: #1a1a1a;
+      color: white;
       font-family: Arial, sans-serif;
       min-height: 100vh;
-      padding: 24px;
+      padding: 20px;
     }
 
+    /* ── TOP BAR ── */
     #top-bar {
       display: flex;
       align-items: center;
+      justify-content: center;
+      position: relative;
       margin-bottom: 24px;
     }
 
     #back-btn {
+      position: absolute;
+      left: 0;
       background: none;
       border: none;
-      font-size: 24px;
-      cursor: pointer;
-      margin-right: 12px;
-    }
-
-    h1 {
-      font-size: 22px;
-      font-weight: bold;
-      color: #1a1a1a;
-    }
-
-    #success-box {
-      background-color: #2E7D32;
-      border-radius: 16px;
-      padding: 28px;
-      text-align: center;
       color: white;
+      font-size: 22px;
+      cursor: pointer;
+    }
+
+    #top-title {
+      color: #4CAF50;
+      font-size: 16px;
+      font-weight: bold;
+    }
+
+    /* ── SUCCESS BOX ── */
+    #success-box {
+      background-color: #2a2a2a;
+      border: 2px solid #4CAF50;
+      border-radius: 20px;
+      padding: 32px 24px;
+      text-align: center;
       margin-bottom: 20px;
     }
 
     #success-icon {
-      font-size: 48px;
-      margin-bottom: 12px;
+      font-size: 56px;
+      display: block;
+      margin-bottom: 16px;
     }
 
     #success-title {
-      font-size: 22px;
+      font-size: 24px;
       font-weight: bold;
-      margin-bottom: 6px;
+      color: #4CAF50;
+      margin-bottom: 8px;
     }
 
     #success-subtitle {
       font-size: 14px;
-      color: #a8d5b0;
+      color: #aaa;
     }
 
+    /* ── IMPACT BOX ── */
     #impact-box {
-      background-color: white;
-      border-radius: 12px;
+      background-color: #2a2a2a;
+      border-radius: 16px;
       padding: 20px;
-      margin-bottom: 16px;
-      box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+      margin-bottom: 12px;
     }
 
-    #impact-title {
-      font-size: 13px;
-      color: #757575;
-      margin-bottom: 12px;
+    .impact-title {
+      font-size: 12px;
+      color: #888;
       text-transform: uppercase;
-      letter-spacing: 0.5px;
+      letter-spacing: 0.8px;
+      margin-bottom: 14px;
     }
 
     .impact-row {
       display: flex;
       align-items: center;
-      margin-bottom: 10px;
+      margin-bottom: 12px;
       font-size: 15px;
-      color: #1a1a1a;
+      color: white;
     }
 
-    .impact-row .icon {
+    .impact-row .impact-icon {
       font-size: 20px;
       margin-right: 12px;
       width: 28px;
       text-align: center;
     }
 
-    #hazard-detail-box {
-      background-color: white;
-      border-radius: 12px;
+    /* ── HAZARD DETAIL BOX ── */
+    #hazard-box {
+      background-color: #2a2a2a;
+      border-radius: 16px;
       padding: 20px;
       margin-bottom: 24px;
-      box-shadow: 0 1px 4px rgba(0,0,0,0.08);
     }
 
-    #hazard-detail-title {
-      font-size: 13px;
-      color: #757575;
-      margin-bottom: 8px;
+    #hazard-title {
+      font-size: 12px;
+      color: #888;
       text-transform: uppercase;
-      letter-spacing: 0.5px;
+      letter-spacing: 0.8px;
+      margin-bottom: 12px;
     }
 
-    #hazard-type-badge {
+    #hazard-badge {
       display: inline-block;
-      padding: 4px 12px;
+      padding: 6px 14px;
       border-radius: 20px;
       font-size: 13px;
       font-weight: bold;
-      margin-bottom: 8px;
+      margin-bottom: 10px;
     }
 
     #hazard-alert-text {
       font-size: 14px;
-      color: #444;
+      color: #aaa;
       line-height: 1.5;
     }
 
+    /* ── BUTTONS ── */
     .bottom-btn {
       display: block;
       width: 100%;
-      padding: 16px;
-      border-radius: 12px;
+      padding: 18px;
+      border-radius: 14px;
       border: none;
       font-size: 16px;
       font-weight: bold;
@@ -135,57 +145,66 @@
     }
 
     #report-another-btn {
-      background-color: #2E7D32;
-      color: white;
+      background-color: #FFC107;
+      color: #1a1a1a;
+    }
+
+    #report-another-btn:active {
+      background-color: #E6AC00;
     }
 
     #back-map-btn {
-      background-color: white;
-      color: #2E7D32;
-      border: 2px solid #2E7D32;
+      background-color: #2a2a2a;
+      color: #FFC107;
+      border: 2px solid #FFC107;
+    }
+
+    #back-map-btn:active {
+      background-color: #2a2200;
     }
   </style>
 </head>
 <body>
 
+  <!-- Top bar -->
   <div id="top-bar">
-    <button id="back-btn"
-            aria-label="Go back"
+    <button id="back-btn" aria-label="Go back"
             onclick="window.location.href='map.html'">←</button>
-    <h1>Report Confirmed</h1>
+    <span id="top-title">Report Confirmed</span>
   </div>
 
   <!-- Success banner -->
   <div id="success-box" role="status" aria-live="polite">
-    <div id="success-icon">✅</div>
+    <span id="success-icon">✅</span>
     <div id="success-title">Your report is live</div>
-    <div id="success-subtitle" id="impact-count">Alerting nearby users...</div>
+    <div id="success-subtitle">Alerting nearby users...</div>
   </div>
 
   <!-- Impact stats -->
   <div id="impact-box">
-    <div id="impact-title">What happened</div>
+    <div class="impact-title">What happened</div>
     <div class="impact-row">
-      <span class="icon">📍</span>
+      <span class="impact-icon">📍</span>
       <span>Pin is now live on the map</span>
     </div>
     <div class="impact-row">
-      <span class="icon">🔊</span>
+      <span class="impact-icon">🔊</span>
       <span>Voice alerts sent to nearby users</span>
     </div>
     <div class="impact-row">
-      <span class="icon">👥</span>
+      <span class="impact-icon">👥</span>
       <span id="nearby-count">Checking nearby users...</span>
     </div>
   </div>
 
   <!-- Hazard detail -->
-  <div id="hazard-detail-box">
-    <div id="hazard-detail-title">Your Report</div>
-    <div id="hazard-type-badge">Loading...</div>
+  <div id="hazard-box">
+    <div id="hazard-title">Your Report</div>
+    <div id="hazard-badge">Loading...</div>
     <div id="hazard-alert-text">Loading alert text...</div>
   </div>
 
+  <!-- Buttons -->
   <button class="bottom-btn" id="report-another-btn"
           aria-label="Report another hazard"
           onclick="window.location.href='report.html'">
@@ -194,47 +213,97 @@
 
   <button class="bottom-btn" id="back-map-btn"
           aria-label="Back to map"
-          onclick="window.location.href='map.html'">
+          onclick="window.location.href='navigator.html'">
     Back to Map
   </button>
 
   <script src="js/voice.js"></script>
   <script>
-    // Urgency colors
     const URGENCY_COLORS = {
-      high:   { bg: "#FFEBEE", text: "#C62828" },
-      medium: { bg: "#FFF8E1", text: "#F57F17" },
-      low:    { bg: "#E8F5E9", text: "#2E7D32" },
+      high:   { bg: "#3a0000", text: "#FF5252", border: "#FF5252" },
+      medium: { bg: "#2a1a00", text: "#FFC107", border: "#FFC107" },
+      low:    { bg: "#002a00", text: "#4CAF50", border: "#4CAF50" },
     };
 
-    // Load report data passed from report.html via sessionStorage
-    window.addEventListener("load", () => {
-      const raw = sessionStorage.getItem("lastReport");
+    const HAZARD_LABELS = {
+      uneven_surface: "Uneven Surface",
+      robot:          "Stuck Robot",
+      construction:   "Construction",
+      broken_sidewalk:"Broken Path",
+      vehicle:        "Vehicle Block",
+      other:          "Other",
+    };
 
+    window.addEventListener("load", () => {
+      // Load settings
+      const contrast  = localStorage.getItem("highContrast") === "true";
+      const largeText = localStorage.getItem("largeText")    === "true";
+
+      // Apply contrast
+      if (contrast) {
+        document.body.style.fontWeight = "bold";
+        document.querySelectorAll("*").forEach(el => {
+          el.style.fontWeight = "bold";
+        });
+        document.getElementById("impact-box").style.backgroundColor = "#E6AC00";
+        document.getElementById("hazard-box").style.backgroundColor = "#E6AC00";
+        document.querySelectorAll(".impact-row").forEach(el => {
+          el.style.color = "#1a1a1a";
+        });
+        document.querySelectorAll(".impact-title, #hazard-title").forEach(el => {
+          el.style.color = "#333";
+        });
+        document.getElementById("hazard-alert-text").style.color = "#333";
+        document.getElementById("top-title").style.color = "#1a1a1a";
+        document.getElementById("back-btn").style.color = "#1a1a1a";
+        document.getElementById("back-map-btn").style.backgroundColor = "#2a2a2a";
+        document.getElementById("back-map-btn").style.color = "#FFC107";
+      }
+
+      // Apply large text
+      if (largeText) {
+        document.body.style.fontSize = "150%";
+        document.getElementById("success-title").style.fontSize = "28px";
+        document.getElementById("top-title").style.fontSize = "20px";
+        document.querySelectorAll(".bottom-btn").forEach(el => {
+          el.style.fontSize = "18px";
+        });
+        document.querySelectorAll(".impact-row").forEach(el => {
+          el.style.fontSize = "17px";
+        });
+      }
+
+      // Load report data from sessionStorage
+      const raw = sessionStorage.getItem("lastReport");
       if (raw) {
         const report = JSON.parse(raw);
 
-        // Badge color by urgency
-        const badge = document.getElementById("hazard-type-badge");
-        const colors = URGENCY_COLORS[report.urgency] || URGENCY_COLORS.low;
-        badge.textContent = (report.hazard_type || "hazard").replace("_", " ").toUpperCase();
+        // Badge
+        const badge = document.getElementById("hazard-badge");
+        const colors = URGENCY_COLORS[report.urgency] || URGENCY_COLORS.medium;
+        badge.textContent = HAZARD_LABELS[report.hazard_type] || "Hazard";
         badge.style.backgroundColor = colors.bg;
         badge.style.color = colors.text;
+        badge.style.border = `2px solid ${colors.border}`;
 
         // Alert text
         document.getElementById("hazard-alert-text").textContent =
           report.alert_text || "Hazard reported at this location.";
 
-        // Nearby count (from Firebase response)
+        // Nearby count
         const count = report.nearby_count || 0;
         document.getElementById("nearby-count").textContent =
           count + " people nearby will be rerouted";
         document.getElementById("success-subtitle").textContent =
           count + " people nearby will be rerouted";
 
-        // Read confirmation aloud
-        speakAlert("Report confirmed. " + (report.alert_text || "Hazard reported.")
-          + " " + count + " people nearby have been alerted.");
+        // Voice confirmation
+        const voiceEnabled = localStorage.getItem("voiceAlerts") !== "false";
+        if (voiceEnabled) {
+          speakAlert("Report confirmed. " +
+            (report.alert_text || "Hazard reported.") +
+            " " + count + " people nearby have been alerted.");
+        }
       }
     });
   </script>
