@@ -351,7 +351,7 @@ function checkHazardsOnRoute() {
   if (!currentRoute || !currentRoute.routes.length) return;
 
   const routePath = currentRoute.routes[0].overview_path;
-  const routeThreshold = 120;
+  const routeThreshold = 400;
 
   // ルート上の全障害物を収集
   const hazardsOnRoute = [];
