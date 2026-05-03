@@ -1,3 +1,5 @@
+/*
+
 const API = "http://localhost:5000";
 
 const URGENCY_COLORS = {
@@ -93,3 +95,4 @@ async function loadHazards() {
         console.error("Could not load hazards:", err);
     }
 }
+*/

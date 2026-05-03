@@ -240,6 +240,15 @@
 
   <!-- Notes -->
   <div class="section-title">Notes (optional)</div>
+
+  <button id="mic-btn"
+        type="button"
+        onclick="startVoiceReporting()"
+        style="width: 100%; background-color: #2a2a2a; border: 2px solid #FFC107; border-radius: 14px; padding: 12px; color: #FFC107; margin-bottom: 10px; cursor: pointer; font-weight: bold;">
+        🎤 Use Voice to Describe
+  </button>
+
+
   <textarea id="notes-input"
             placeholder="Add any additional details..."
             aria-label="Additional notes"></textarea>
@@ -402,5 +411,6 @@
     } 
   </script>
 
+  <script src="js/speech-to-text.js"></script>
 </body>
 </html>
