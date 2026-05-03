@@ -7,51 +7,72 @@
     <link rel="stylesheet" href="styles/home.css">
 </head>
 <body>
-    <header>
-        <h1 class="app-title">Insert Name Here</h1>
-        <div class="logo">Insert Logo Here</div>
-        <p class="app-subtitle">Accessible Navigation for Everyone</p>
-    </header>
+    <div class="screen" id="screen-home">
+        <header>
+            <h1 class="app-title">Navable</h1>
+            <div class="logo">🧭</div>
+        </header>
 
-    <div>
-        <div class="screen" id="screen-home">
-            <div class="home-content">
-                <section class="grid">
-                    <button class="card" onclick="showScreen('screen-report')">
-                        <div class="icon-box">Icon Here</div>
-                        <h2 class="card-title">Report Hazard</h2>
-                        <p class="card-description">Insert Descriptions</p>
-                    </button>
-                </section>
+        <div class="home-content">
+            <button class="card" onclick="showScreen('screen-report')">
+                <div class="icon-box">⚑</div>
+                <h2 class="card-title">Report Hazard</h2>
+                <p class="card-description">Insert Descriptions</p>
+            </button>
 
-                <section class="grid">
-                    <button class="card" onclick="showScreen('screen-navigator')">
-                        <div class="icon-box">Icon Here</div>
-                        <h2 class="card-title">Wheelchair User</h2>
-                        <p class="card-description">Insert Description</p>
-                    </button>
-                </section>
+            <button class="card" onclick="showScreen('screen-navigator')">
+                <div class="icon-box">♿︎</div>
+                <h2 class="card-title">Wheelchair User</h2>
+                <p class="card-description">Insert Description</p>
+            </button>
 
-                <section class="grid">
-                    <button class="card" onclick="showScreen('screen-navigator')">
-                        <div class="icon-box">Icon Here</div>
-                        <h2 class="card-title">Visually Impaired</h2>
-                        <p class="card-description">Insert Description</p>
-                    </button>
-                </section>
-            </div>
+            <button class="card" onclick="showScreen('screen-navigator')">
+                    <div class="icon-box">
+                        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+                        <line x1="1" y1="1" x2="23" y2="23"></line>
+                    </svg>
+                </div>
+                <h2 class="card-title">Visually Impaired</h2>
+                <p class="card-description">Insert Description</p>
+            </button>
         </div>
-        <div class="screen hidden" id="screen-report">
-            <div class="screen-content">
-                <button class="back-button" onclick="showScreen('screen-home')">Arrow Back</button>
-            </div>
+    </div>
+
+    <div class="screen hidden" id="screen-report">
+        <div class="placeholder-content">
+            <h2 class="app-title" style="font-size: 2rem;">Report Hazard</h2>
         </div>
-    </div>  
+        <div class="screen-header">
+            <button class="back-button" onclick="showScreen('screen-home')">Arrow Back</button>
+        </div>
+    </div>
+
+    <div class="screen hidden" id="screen-navigator">
+        <div class="placeholder-content">
+            <h2 class="app-title" style="font-size: 2rem;">Navigation Mode</h2>
+        </div>
+        <div class="screen-header">
+            <button class="back-button" onclick="showScreen('screen-home')">Arrow Back</button>
+        </div>
+    </div>
+
+    <div class="screen hidden" id="screen-report">
+        <div class="screen-header">
+            <button class="back-button" onclick="showScreen('screen-home')">Arrow Back</button>
+            <h2>Hazard Reporting</h2>
+        </div>
+    </div>
     <script>
         function showScreen(id)
         {
             document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
-            document.getElementById(id).classList.remove('hidden');
+            const target = document.getElementById(id);
+            if (target)
+            {
+                target.classList.remove('hidden');
+                window.scrollTo(0,0);
+            }
         }
     </script>
 </body>
