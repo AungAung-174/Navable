@@ -273,10 +273,24 @@
   </div>
 
   <script src="js/voice.js"></script>
-  <script src="javascript/map.js"></script>
-  <script async defer
-    src=""></script>
+  <script src="js/map.js"></script>
   <script>
+    async function loadGoogleMaps() {
+      const res = await fetch("http://localhost:5000/config/maps");
+      const config = await res.json();
+
+      const script = document.createElement("script");
+      script.src = `https://maps.googleapis.com/maps/api/js?key=${config.googleMapsApiKey}&callback=initMap`;
+      script.async = true;
+      script.defer = true;
+
+      document.head.appendChild(script);
+    }
+
+    loadGoogleMaps();
+  </script>
+  <script>
+
     let lastDirection = "Waiting for route...";
     let voiceEnabled = true;
     let currentVolume = 1.0;
