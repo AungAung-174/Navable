@@ -81,8 +81,8 @@
     }
 
     .vol-btn {
-      background-color: #1a1a1a;
-      border: none;
+      background-color: #2a2a2a;
+      border: 2px solid;
       border-radius: 8px;
       padding: 12px;
       color: #FFC107;
@@ -318,7 +318,42 @@
     }
 
     window.addEventListener("load", () => {
-      watchUserLocation();
+  // Load settings from localStorage
+        const contrast  = localStorage.getItem("highContrast") === "true";
+        const largeText = localStorage.getItem("largeText")    === "true";
+        const frequency = localStorage.getItem("alertFrequency") || "high";
+
+  // Apply high contrast
+        if (contrast) {
+            document.body.style.backgroundColor = "#1a1a1a";
+            document.body.style.color = "#1a1a1a";
+            document.body.style.fontWeight = "bold";
+            document.querySelectorAll("*").forEach(el => {
+                el.style.fontWeight = "bold";
+            });
+    // Invert button colors
+            document.querySelectorAll(".action-btn").forEach(el => {
+                el.style.backgroundColor = "#E6AC00";
+                el.style.color = "#1a1a1a";
+            });
+            document.getElementById("voiceover-box").style.backgroundColor = "#E6AC00";
+            document.getElementById("direction-box").style.backgroundColor = "#E6AC00";
+            document.getElementById("hazard-banner").style.backgroundColor = "#8B0000"
+        }
+
+  // Apply large text
+        if (largeText) {
+            document.querySelectorAll(".action-btn").forEach(el => {
+                el.style.fontSize = "18px";
+            });
+            document.getElementById("direction-text").style.fontSize = "30px";
+            document.getElementById("voiceover-title").style.fontSize = "20px";
+        }
+
+  // Apply frequency
+        setFrequency(frequency, false);
+
+        watchUserLocation();
     });
   </script>
 
