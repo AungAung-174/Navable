@@ -2,28 +2,34 @@ let map, directionsService, directionsRenderer, userMarker;
 let currentRoute = null;
 let currentStep = 0;
 let watchId = null;
-let lastHeading = null;
 let navigationActive = false;
+let lastDestination = null;
+let hazardMarkers = [];
+let warnedRouteHazards = new Set();
+let warnedNearbyHazards = new Set();
+let lastDeviationAlertAt = 0;
 
-const HAZARDS = [
-  { lat: 44.5650, lng: -123.2780, type: "high",     label: "Blocked ramp — MU Quad" },
-  { lat: 44.5625, lng: -123.2810, type: "medium",   label: "Stuck robot — Valley Library" },
-  { lat: 44.5640, lng: -123.2760, type: "resolved", label: "Resolved — Dixon Rec" },
+const FALLBACK_HAZARDS = [
+  { id: "demo-1", lat: 44.5650, lng: -123.2780, urgency: "high", alert_text: "Blocked ramp near MU Quad" },
+  { id: "demo-2", lat: 44.5625, lng: -123.2810, urgency: "medium", alert_text: "Robot blocking path near Valley Library" },
+  { id: "demo-3", lat: 44.5640, lng: -123.2760, urgency: "low", alert_text: "Uneven sidewalk near Dixon Rec" },
 ];
 
 const PIN_COLORS = {
-  high:     "#D32F2F",
-  medium:   "#F57C00",
-  resolved: "#388E3C"
+  high: "#D32F2F",
+  medium: "#F57C00",
+  low: "#FFC107",
+  resolved: "#388E3C",
+  default: "#1976D2",
 };
 
 const MAP_STYLE = [
-  { elementType: "geometry",            stylers: [{ color: "#1a1a1a" }] },
-  { elementType: "labels.text.fill",    stylers: [{ color: "#FFC107" }] },
-  { elementType: "labels.text.stroke",  stylers: [{ color: "#000000" }] },
+  { elementType: "geometry", stylers: [{ color: "#1a1a1a" }] },
+  { elementType: "labels.text.fill", stylers: [{ color: "#FFC107" }] },
+  { elementType: "labels.text.stroke", stylers: [{ color: "#000000" }] },
   { featureType: "road", elementType: "geometry", stylers: [{ color: "#2a2a2a" }] },
-  { featureType: "poi",  elementType: "geometry", stylers: [{ color: "#1a1a1a" }] },
-  { featureType: "water",elementType: "geometry", stylers: [{ color: "#0a0a0a" }] },
+  { featureType: "poi", elementType: "geometry", stylers: [{ color: "#1a1a1a" }] },
+  { featureType: "water", elementType: "geometry", stylers: [{ color: "#0a0a0a" }] },
 ];
 
 function initMap() {
@@ -35,183 +41,276 @@ function initMap() {
     mapTypeId: "roadmap",
     disableDefaultUI: true,
     zoomControl: true,
-    styles: MAP_STYLE
+    styles: MAP_STYLE,
   });
 
-  directionsService  = new google.maps.DirectionsService();
+  directionsService = new google.maps.DirectionsService();
   directionsRenderer = new google.maps.DirectionsRenderer({
-    map: map,
+    map,
     suppressMarkers: false,
     polylineOptions: {
-      strokeColor:   "#FFC107",
-      strokeWeight:  5,
-      strokeOpacity: 0.9
-    }
+      strokeColor: "#FFC107",
+      strokeWeight: 5,
+      strokeOpacity: 0.9,
+    },
   });
 
-  placeHazardPins();
+  fetchHazards();
+  setInterval(fetchHazards, 10000);
   getUserLocation();
 }
 
+function normalizeHazard(hazard, index) {
+  const urgency = hazard.urgency || hazard.type || "medium";
+  const alertText = hazard.alert_text || hazard.label || hazard.description || "Hazard reported ahead";
+
+  return {
+    id: hazard.id || `hazard-${index}`,
+    lat: Number(hazard.lat),
+    lng: Number(hazard.lng),
+    urgency,
+    alert_text: alertText,
+    hazard_type: hazard.hazard_type || "other",
+    source: hazard.source || "demo",
+  };
+}
+
+async function fetchHazards() {
+  try {
+    const res = await fetch(`${API_BASE}/hazards`);
+    if (!res.ok) throw new Error("Hazards request failed");
+
+    const data = await res.json();
+    const hazards = data
+      .map(normalizeHazard)
+      .filter(h => Number.isFinite(h.lat) && Number.isFinite(h.lng));
+
+    window.hazards = hazards.length ? hazards : FALLBACK_HAZARDS;
+  } catch (error) {
+    console.warn("Using fallback hazards:", error);
+    window.hazards = FALLBACK_HAZARDS;
+  }
+
+  placeHazardPins();
+
+  if (currentRoute) {
+    checkHazardsOnRoute();
+  }
+}
+
 function placeHazardPins() {
-  HAZARDS.forEach(h => {
+  if (!map) return;
+
+  hazardMarkers.forEach(marker => marker.setMap(null));
+  hazardMarkers = [];
+
+  (window.hazards || []).forEach(h => {
     const marker = new google.maps.Marker({
       position: { lat: h.lat, lng: h.lng },
-      map: map,
-      title: h.label,
+      map,
+      title: h.alert_text,
       icon: {
         path: google.maps.SymbolPath.CIRCLE,
-        fillColor:   PIN_COLORS[h.type],
+        fillColor: PIN_COLORS[h.urgency] || PIN_COLORS.default,
         fillOpacity: 1,
         strokeColor: "#FFFFFF",
         strokeWeight: 2.5,
-        scale: 10
-      }
+        scale: 10,
+      },
     });
 
     const info = new google.maps.InfoWindow({
-      content: `<div style="background:#111;color:#FFC107;padding:6px 10px;
-                border-radius:6px;font-size:12px;font-weight:600;">${h.label}</div>`
+      content: `<div style="background:#111;color:#FFC107;padding:6px 10px;border-radius:6px;font-size:12px;font-weight:600;">${h.alert_text}</div>`,
     });
 
     marker.addListener("click", () => {
       info.open(map, marker);
-      speakAlert(h.label + ". Proceed with caution.");
+      speakAlert(h.alert_text + ". Proceed with caution.");
     });
+
+    hazardMarkers.push(marker);
   });
 }
 
 function getUserLocation() {
-  if (!navigator.geolocation) return;
+  if (!navigator.geolocation || !map) return;
 
-  navigator.geolocation.getCurrentPosition(pos => {
-    const userPos = {
-      lat: pos.coords.latitude,
-      lng: pos.coords.longitude
-    };
+  navigator.geolocation.getCurrentPosition(
+    pos => {
+      const userPos = {
+        lat: pos.coords.latitude,
+        lng: pos.coords.longitude,
+      };
 
+      updateUserMarker(userPos);
+      map.setCenter(userPos);
+    },
+    () => {
+      console.log("Location access denied. Centering on OSU.");
+    },
+    {
+      enableHighAccuracy: true,
+      timeout: 8000,
+      maximumAge: 0,
+    }
+  );
+}
+
+function updateUserMarker(userPos) {
+  if (!map) return;
+
+  if (!userMarker) {
     userMarker = new google.maps.Marker({
       position: userPos,
-      map: map,
+      map,
       title: "You are here",
       icon: {
         path: google.maps.SymbolPath.CIRCLE,
-        fillColor:   "#1976D2",
+        fillColor: "#1976D2",
         fillOpacity: 1,
         strokeColor: "#FFFFFF",
         strokeWeight: 3,
-        scale: 10
-      }
+        scale: 10,
+      },
     });
+    return;
+  }
 
-    map.setCenter(userPos);
-
-  }, () => {
-    console.log("Location access denied — centering on OSU");
-  });
+  userMarker.setPosition(userPos);
 }
 
-function showRoute() {
+function buildDestinationQuery(destination) {
+  const text = String(destination || "").trim();
+
+  if (!text) return "";
+  if (/osu|oregon state|corvallis/i.test(text)) return text;
+
+  return `${text}, Oregon State University, Corvallis, OR`;
+}
+
+function showRoute(destinationText) {
+  if (!directionsService || !directionsRenderer) {
+    speakAlert("Map is still loading. Please try again.");
+    return;
+  }
+
   if (!navigator.geolocation) {
     speakAlert("Location not available on this device.");
     return;
   }
 
-  const destination = { lat: 44.5648, lng: -123.2803 };
+  const destination = buildDestinationQuery(destinationText || lastDestination);
+  if (!destination) {
+    speakAlert("Please enter a destination.");
+    return;
+  }
 
-  navigator.geolocation.getCurrentPosition(pos => {
-    const origin = {
-      lat: pos.coords.latitude,
-      lng: pos.coords.longitude
-    };
+  lastDestination = destination;
 
-    directionsService.route({
-      origin:      origin,
-      destination: destination,
-      travelMode:  google.maps.TravelMode.WALKING,
-    }, (result, status) => {
-      if (status === "OK") {
-        directionsRenderer.setDirections(result);
-        currentRoute = result;
-        currentStep = 0;
-        navigationActive = true;
-        
-        const leg = result.routes[0].legs[0];
-        const step = leg.steps[0].instructions.replace(/<[^>]*>/g, "");
-        document.getElementById("direction-text").textContent = step;
-        speakAlert("Route found. " + leg.duration.text + " away. " + step);
-        
-        // Start real-time navigation tracking
-        startRealTimeNavigation();
-      } else {
-        speakAlert("Could not find a route. Please try again.");
-      }
-    });
-  });
+  navigator.geolocation.getCurrentPosition(
+    pos => {
+      const origin = {
+        lat: pos.coords.latitude,
+        lng: pos.coords.longitude,
+      };
+
+      updateUserMarker(origin);
+
+      directionsService.route(
+        {
+          origin,
+          destination,
+          travelMode: google.maps.TravelMode.WALKING,
+        },
+        (result, status) => {
+          if (status === "OK") {
+            directionsRenderer.setDirections(result);
+            currentRoute = result;
+            currentStep = 0;
+            navigationActive = true;
+            warnedRouteHazards.clear();
+
+            const leg = result.routes[0].legs[0];
+            const step = stripHtml(leg.steps[0].instructions);
+
+            setDirectionText(step);
+            speakAlert(`Route found. ${leg.duration.text} away. ${step}`);
+
+            checkHazardsOnRoute();
+            startRealTimeNavigation();
+          } else {
+            console.error("Directions failed:", status);
+            speakAlert("Could not find a route. Please try another destination.");
+            setDirectionText("Could not find a route.");
+          }
+        }
+      );
+    },
+    error => {
+      console.error("Geolocation failed:", error);
+      speakAlert("Location permission is needed to start navigation.");
+    },
+    {
+      enableHighAccuracy: true,
+      timeout: 10000,
+      maximumAge: 0,
+    }
+  );
+}
+
+function stripHtml(value) {
+  return String(value || "").replace(/<[^>]*>/g, "");
+}
+
+function setDirectionText(text) {
+  const directionText = document.getElementById("direction-text");
+  if (directionText) directionText.textContent = text;
+
+  if (typeof lastDirection !== "undefined") {
+    lastDirection = text;
+  }
 }
 
 function startRealTimeNavigation() {
-  // Stop any existing watch
   if (watchId !== null) {
     navigator.geolocation.clearWatch(watchId);
   }
 
-  // Watch position continuously for real-time updates
   watchId = navigator.geolocation.watchPosition(
-    (position) => {
-      updateUserPosition(position);
-    },
-    (error) => {
-      console.error("Geolocation error:", error);
-    },
+    position => updateUserPosition(position),
+    error => console.error("Geolocation watch error:", error),
     {
       enableHighAccuracy: true,
       timeout: 5000,
-      maximumAge: 0
+      maximumAge: 0,
     }
   );
 }
 
 function updateUserPosition(position) {
-  if (!navigationActive || !currentRoute) return;
-
   const userPos = {
     lat: position.coords.latitude,
-    lng: position.coords.longitude
+    lng: position.coords.longitude,
   };
 
-  // Update user marker
-  if (userMarker) {
-    userMarker.setPosition(userPos);
-  }
+  updateUserMarker(userPos);
 
-  // Update heading if available
-  if (position.coords.heading !== null && position.coords.heading !== undefined) {
-    lastHeading = position.coords.heading;
-  }
+  if (!navigationActive || !currentRoute) return;
 
-  // Check for route deviation
   checkRouteDeviation(userPos);
-
-  // Check for nearby hazards
-  checkNearbyHazards(userPos, position.coords.accuracy);
-
-  // Update navigation step if user has moved far enough
+  checkNearbyHazards(userPos);
   updateNavigationStep(userPos);
 
-  // Center map on user
   map.setCenter(userPos);
 }
 
 function checkRouteDeviation(userPos) {
-  if (!currentRoute || currentRoute.routes.length === 0) return;
+  if (!currentRoute || !currentRoute.routes.length) return;
 
   const routePath = currentRoute.routes[0].overview_path;
-  const deviationThreshold = 30; // meters
-
-  // Calculate distance from user to nearest point on route
+  const deviationThreshold = 45;
   let minDistance = Infinity;
-  
+
   routePath.forEach(point => {
     const distance = google.maps.geometry.spherical.computeDistanceBetween(
       new google.maps.LatLng(userPos.lat, userPos.lng),
@@ -220,60 +319,100 @@ function checkRouteDeviation(userPos) {
     minDistance = Math.min(minDistance, distance);
   });
 
-  if (minDistance > deviationThreshold) {
-    speakAlert("You have deviated from the route. Recalculating...");
-    // Recalculate route from current position
-    showRoute();
+  const now = Date.now();
+  if (minDistance > deviationThreshold && now - lastDeviationAlertAt > 30000) {
+    lastDeviationAlertAt = now;
+    speakAlert("You have moved away from the route. Recalculating.");
+    showRoute(lastDestination);
   }
 }
 
-function checkNearbyHazards(userPos, accuracy) {
-  const proximityThreshold = 100; // meters
+function distanceToRouteMeters(hazard, routePath) {
+  let minDistance = Infinity;
 
-  HAZARDS.forEach(hazard => {
+  routePath.forEach(point => {
+    const distance = google.maps.geometry.spherical.computeDistanceBetween(
+      new google.maps.LatLng(hazard.lat, hazard.lng),
+      point
+    );
+    minDistance = Math.min(minDistance, distance);
+  });
+
+  return minDistance;
+}
+
+function checkHazardsOnRoute() {
+  if (!currentRoute || !currentRoute.routes.length) return;
+
+  const routePath = currentRoute.routes[0].overview_path;
+  const routeThreshold = 55;
+
+  (window.hazards || []).forEach(hazard => {
+    const distance = distanceToRouteMeters(hazard, routePath);
+
+    if (distance <= routeThreshold && !warnedRouteHazards.has(hazard.id)) {
+      warnedRouteHazards.add(hazard.id);
+
+      const text = `Hazard on route: ${hazard.alert_text}`;
+      showHazardWarning(text);
+    }
+  });
+}
+
+function checkNearbyHazards(userPos) {
+  const proximityThreshold = 80;
+
+  (window.hazards || []).forEach(hazard => {
     const distance = google.maps.geometry.spherical.computeDistanceBetween(
       new google.maps.LatLng(userPos.lat, userPos.lng),
       new google.maps.LatLng(hazard.lat, hazard.lng)
     );
 
-    if (distance < proximityThreshold && distance < (accuracy || 20)) {
+    if (distance <= proximityThreshold && !warnedNearbyHazards.has(hazard.id)) {
+      warnedNearbyHazards.add(hazard.id);
+
       const meters = Math.round(distance);
-      speakAlert(`Alert: ${hazard.label} in ${meters} meters ahead. Use caution.`);
+      showHazardWarning(`Alert: ${hazard.alert_text} in ${meters} meters. Use caution.`);
     }
   });
+}
+
+function showHazardWarning(text) {
+  if (typeof showHazardBanner === "function") {
+    showHazardBanner(text);
+  } else {
+    speakAlert(text);
+  }
 }
 
 function updateNavigationStep(userPos) {
   if (!currentRoute || !currentRoute.routes[0]) return;
 
-  const legs = currentRoute.routes[0].legs;
-  const steps = legs[0].steps;
+  const steps = currentRoute.routes[0].legs[0].steps;
 
   if (currentStep >= steps.length) {
     speakAlert("You have arrived at your destination.");
-    navigationActive = false;
     stopRealTimeNavigation();
     return;
   }
 
   const currentStepData = steps[currentStep];
   const stepEnd = currentStepData.end_location;
-  
-  // Check if user is close to the end of current step
+
   const distanceToStepEnd = google.maps.geometry.spherical.computeDistanceBetween(
     new google.maps.LatLng(userPos.lat, userPos.lng),
     new google.maps.LatLng(stepEnd.lat(), stepEnd.lng())
   );
 
-  if (distanceToStepEnd < 30) { // 30 meters
+  if (distanceToStepEnd < 30) {
     currentStep++;
-    
+
     if (currentStep < steps.length) {
       const nextStep = steps[currentStep];
-      const instruction = nextStep.instructions.replace(/<[^>]*>/g, "");
+      const instruction = stripHtml(nextStep.instructions);
       const distance = nextStep.distance.text;
-      
-      document.getElementById("nav-text").textContent = instruction;
+
+      setDirectionText(instruction);
       speakAlert(`Next: ${instruction}. Distance: ${distance}`);
     }
   }
@@ -284,5 +423,10 @@ function stopRealTimeNavigation() {
     navigator.geolocation.clearWatch(watchId);
     watchId = null;
   }
+
   navigationActive = false;
+}
+
+function watchUserLocation() {
+  getUserLocation();
 }
