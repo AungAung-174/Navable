@@ -61,7 +61,7 @@ function initMap() {
     suppressMarkers: false,
     preserveViewport: false,
     polylineOptions: {
-      strokeColor: "#FFFF00",
+      strokeColor: "blue",
       strokeWeight: 8,
       strokeOpacity: 1.0,
       zIndex: 9999,
