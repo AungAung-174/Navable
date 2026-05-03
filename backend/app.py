@@ -16,9 +16,16 @@ import google.generativeai as genai
 load_dotenv()
 
 # Firebase
-cred = credentials.Certificate("serviceAccountKey.json")
+firebase_credentials_json = os.getenv("FIREBASE_CREDENTIALS_JSON")
+
+if firebase_credentials_json:
+    cred = credentials.Certificate(json.loads(firebase_credentials_json))
+else:
+    cred = credentials.Certificate("serviceAccountKey.json")
+
 firebase_admin.initialize_app(cred)
 db = firestore.client()
+
 
 # Gemini
 genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
@@ -26,9 +33,7 @@ model = genai.GenerativeModel("gemini-2.5-flash")
 
 # Flask
 app = Flask(__name__)
-CORS(app, origins=["http://localhost:5500", "http://127.0.0.1:5500",
-                   "http://localhost:3000", "http://127.0.0.1:3000",
-                   "null"])  # "null" covers opening HTML files directly
+CORS(app)
 
 
 # ---------- Gemini hazard analysis ----------
