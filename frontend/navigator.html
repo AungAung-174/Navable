@@ -544,6 +544,8 @@
     function startNavigation() {
       if (!selectedDestination) return;
 
+      document.body.dataset.userInteracted = "true"; // ← 追加
+
       if (voiceEnabled) speakAlert("Starting navigation to " + selectedDestination);
       setDirection("Finding route to " + selectedDestination, "↑");
 
@@ -601,12 +603,17 @@
       if (voiceEnabled) speakDirection(text);
     }
 
-    function showHazardBanner(text) {
+   function showHazardBanner(text) {
       document.getElementById("hazard-banner-text").textContent = text;
       document.getElementById("hazard-banner").classList.add("visible");
+
       const announcement = document.getElementById("hazard-announcement");
       if (announcement) announcement.textContent = text;
-      if (voiceEnabled) speakAlert(text);
+
+  // ユーザーがすでに操作した後だけ音声を出す
+      if (voiceEnabled && document.body.dataset.userInteracted === "true") {
+        speakAlert(text);
+      }
     }
 
     function highlightBtn(btn, durationMs) {
