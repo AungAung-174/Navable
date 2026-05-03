@@ -485,7 +485,7 @@ s<body>
         <div class="stat-box"><div class="stat-num resolved">1</div><div class="stat-label">Resolved</div></div>
       </div>
       <div class="btn-row">
-        <button class="btn-primary" onclick="showScreen('screen-navigator')">Navigate</button>
+        <button class="btn-primary" onclick="showRoute(); showScreen('screen-navigator')">Navigate</button>
         <button class="btn-outline" onclick="showScreen('screen-report')">Report Hazard</button>
       </div>
     </div>
@@ -677,5 +677,7 @@ s<body>
     document.getElementById('location-display').textContent = 'OSU Campus, Corvallis OR';
   }
 </script>
+<div id="map" style="width:100%;height:320px;display:none;"></div>
+<script src="map.js"></script>
 </body>
 </html>
