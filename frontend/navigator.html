@@ -224,12 +224,16 @@
     </div>
   </div>
 
-  <!-- Direction card -->
+<!-- Map -->
+  <div id="map" style="height: 40vh; width: 100%; border-radius: 16px; margin-bottom: 16px;"></div>
+
+<!-- Direction card -->
   <div id="direction-box" role="status" aria-label="Current direction">
     <span id="direction-arrow">↓</span>
     <div id="direction-text">Waiting for route...</div>
     <div id="direction-sub">Following accessible route</div>
   </div>
+>
 
   <!-- Hazard banner (hidden until triggered) -->
   <div id="hazard-banner" role="alert">
@@ -269,6 +273,9 @@
   </div>
 
   <script src="js/voice.js"></script>
+  <script src="javascript/map.js"></script>
+  <script async defer
+    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCezLeBuqA6vIyc6U1v6sUgUfDheWLjCG8&callback=initMap"></script>
   <script>
     let lastDirection = "Waiting for route...";
     let voiceEnabled = true;
