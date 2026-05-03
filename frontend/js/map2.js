@@ -9,6 +9,17 @@ let warnedRouteHazards = new Set();
 let warnedNearbyHazards = new Set();
 let lastDeviationAlertAt = 0;
 
+const DEMO_ORIGIN = { lat: 44.56463, lng: -123.27875 }; // Memorial Union
+
+const PLACE_COORDINATES = {
+  "Kelley Engineering Center, OSU": { lat: 44.56715, lng: -123.27889 },
+  "Valley Library, OSU": { lat: 44.56507, lng: -123.27606 },
+  "Memorial Union, OSU": { lat: 44.56463, lng: -123.27875 },
+  "Dixon Recreation Center, OSU": { lat: 44.56077, lng: -123.27974 },
+  "Weatherford Hall, OSU": { lat: 44.56336, lng: -123.28204 },
+};
+
+
 const FALLBACK_HAZARDS = [
   { id: "demo-1", lat: 44.5650, lng: -123.2780, urgency: "high", alert_text: "Blocked ramp near MU Quad" },
   { id: "demo-2", lat: 44.5625, lng: -123.2810, urgency: "medium", alert_text: "Robot blocking path near Valley Library" },
@@ -194,69 +205,53 @@ function showRoute(destinationText) {
     return;
   }
 
-  if (!navigator.geolocation) {
-    speakAlert("Location not available on this device.");
-    return;
-  }
+  const destination = PLACE_COORDINATES[destinationText];
 
-  const destination = buildDestinationQuery(destinationText || lastDestination);
   if (!destination) {
-    speakAlert("Please enter a destination.");
+    speakAlert("Please choose one of the listed campus destinations.");
+    setDirectionText("Choose one of the listed campus destinations.");
     return;
   }
 
-  lastDestination = destination;
+  const origin = userMarker
+    ? {
+        lat: userMarker.getPosition().lat(),
+        lng: userMarker.getPosition().lng(),
+      }
+    : DEMO_ORIGIN;
 
-  navigator.geolocation.getCurrentPosition(
-    pos => {
-      const origin = {
-        lat: pos.coords.latitude,
-        lng: pos.coords.longitude,
-      };
-
-      updateUserMarker(origin);
-
-      directionsService.route(
-        {
-          origin,
-          destination,
-          travelMode: google.maps.TravelMode.WALKING,
-        },
-        (result, status) => {
-          if (status === "OK") {
-            directionsRenderer.setDirections(result);
-            currentRoute = result;
-            currentStep = 0;
-            navigationActive = true;
-            warnedRouteHazards.clear();
-
-            const leg = result.routes[0].legs[0];
-            const step = stripHtml(leg.steps[0].instructions);
-
-            setDirectionText(step);
-            speakAlert(`Route found. ${leg.duration.text} away. ${step}`);
-
-            checkHazardsOnRoute();
-            startRealTimeNavigation();
-          } else {
-            console.error("Directions failed:", status);
-            speakAlert("Could not find a route. Please try another destination.");
-            setDirectionText("Could not find a route.");
-          }
-        }
-      );
-    },
-    error => {
-      console.error("Geolocation failed:", error);
-      speakAlert("Location permission is needed to start navigation.");
-    },
+  directionsService.route(
     {
-      enableHighAccuracy: true,
-      timeout: 10000,
-      maximumAge: 0,
+      origin,
+      destination,
+      travelMode: google.maps.TravelMode.WALKING,
+    },
+    (result, status) => {
+      console.log("Directions status:", status);
+
+      if (status === "OK") {
+        directionsRenderer.setDirections(result);
+        currentRoute = result;
+        currentStep = 0;
+        navigationActive = true;
+        warnedRouteHazards.clear();
+
+        const leg = result.routes[0].legs[0];
+        const step = stripHtml(leg.steps[0].instructions);
+
+        setDirectionText(step);
+        speakAlert(`Route found. ${leg.duration.text} away. ${step}`);
+
+        checkHazardsOnRoute();
+        startRealTimeNavigation();
+      } else {
+        speakAlert("Could not find a route. Check console for the Directions status.");
+        setDirectionText("Could not find a route: " + status);
+      }
     }
   );
 }
+
 
 function stripHtml(value) {
   return String(value || "").replace(/<[^>]*>/g, "");
