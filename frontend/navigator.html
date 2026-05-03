@@ -449,23 +449,24 @@
 
 // ── SEARCH INPUT ─────────────────────────────────────
     function onSearchInput(value) {
-      if (value.length < 2) {
+      const trimmed = value.trim();
+
+      if (trimmed.length < 2) {
         document.getElementById("search-results").style.display = "none";
         document.getElementById("go-btn").disabled = true;
         selectedDestination = null;
         return;
       }
-  // Google Places Autocompleteと連携（APIキーがあれば）
-  // 今はデモ用にモック結果を表示
-      showMockResults(value);
+
+      selectedDestination = trimmed;
+      document.getElementById("go-btn").disabled = false;
+      showMockResults(trimmed);
     }
 
     function showMockResults(query) {
       const results = document.getElementById("search-results");
       results.innerHTML = "";
-      results.style.display = "block";
 
-  // デモ用のサンプル場所（実際はGoogle Places APIから取得）
       const mockPlaces = [
         "Kelley Engineering Center, OSU",
         "Valley Library, OSU",
@@ -478,6 +479,8 @@
         results.style.display = "none";
         return;
       }
+
+      results.style.display = "block";
 
       mockPlaces.forEach(place => {
         const item = document.createElement("div");
@@ -538,9 +541,15 @@
 // ── START NAVIGATION ─────────────────────────────────
     function startNavigation() {
       if (!selectedDestination) return;
+
       if (voiceEnabled) speakAlert("Starting navigation to " + selectedDestination);
-      setDirection("Head toward " + selectedDestination, "↑");
-  // 実際はGoogle Maps Directions APIと連携してルートを取得
+      setDirection("Finding route to " + selectedDestination, "↑");
+
+      if (typeof showRoute === "function") {
+        showRoute(selectedDestination);
+      } else {
+        speakAlert("Map is still loading. Please try again.");
+      }
     }
 
     function setFrequency(level) {
