@@ -274,23 +274,9 @@
 
   <script src="js/voice.js"></script>
   <script src="js/map.js"></script>
+  <script async defer
+    src=""></script>
   <script>
-    async function loadGoogleMaps() {
-      const res = await fetch("http://localhost:5000/config/maps");
-      const config = await res.json();
-
-      const script = document.createElement("script");
-      script.src = `https://maps.googleapis.com/maps/api/js?key=${config.googleMapsApiKey}&callback=initMap`;
-      script.async = true;
-      script.defer = true;
-
-      document.head.appendChild(script);
-    }
-
-    loadGoogleMaps();
-  </script>
-  <script>
-
     let lastDirection = "Waiting for route...";
     let voiceEnabled = true;
     let currentVolume = 1.0;
@@ -323,7 +309,11 @@
         medium: "Normal alerts. High and medium urgency hazards.",
         high:   "All alerts. Every hazard will be announced.",
     };
-    speakAlert(labels[level]);
+
+    if(voiceEnabled)
+    {
+      speakAlert(labels[level]);
+    }
 }
 
     function toggleVoice() {
@@ -393,6 +383,7 @@
         const largeText = localStorage.getItem("largeText")    === "true";
         const frequency = localStorage.getItem("alertFrequency") || "high";
 
+        voiceEnabled = localStorage.getItem("voiceAlerts") !== "false";
   // Apply high contrast
         if (contrast) {
             document.body.style.backgroundColor = "#1a1a1a";
@@ -412,7 +403,7 @@
             document.getElementById("direction-text").style.color = "#1a1a1a";
             document.getElementById("direction-sub").style.color = "#333";
             document.getElementById("hazard-banner").style.backgroundColor = "#8B0000"
-            document.getElementById("top-title").style.color = "#FFC107";
+            document.getElementById("top-title").style.color = "#1a1a1a";
             document.getElementById("back-btn").style.color = "white";
             document.querySelectorAll(".vol-btn").forEach(el => {
                 el.style.color ="white";
