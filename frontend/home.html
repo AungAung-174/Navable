@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OSU Hackathon 2026</title>
+    <link rel="stylesheet" href="styles/home.css">
+</head>
+<body>
+    <header>
+        <h1 class="app-title">Insert Name Here</h1>
+        <div class="logo">Insert Logo Here</div>
+        <p class="app-subtitle">Accessible Navigation for Everyone</p>
+    </header>
+
+    <div>
+        <div class="screen" id="screen-home">
+            <div class="home-content">
+                <section class="grid">
+                    <button class="card" onclick="showScreen('screen-report')">
+                        <div class="icon-box">Icon Here</div>
+                        <h2 class="card-title">Report Hazard</h2>
+                        <p class="card-description">Insert Descriptions</p>
+                    </button>
+                </section>
+
+                <section class="grid">
+                    <button class="card" onclick="showScreen('screen-navigator')">
+                        <div class="icon-box">Icon Here</div>
+                        <h2 class="card-title">Wheelchair User</h2>
+                        <p class="card-description">Insert Description</p>
+                    </button>
+                </section>
+
+                <section class="grid">
+                    <button class="card" onclick="showScreen('screen-navigator')">
+                        <div class="icon-box">Icon Here</div>
+                        <h2 class="card-title">Visually Impaired</h2>
+                        <p class="card-description">Insert Description</p>
+                    </button>
+                </section>
+            </div>
+        </div>
+        <div class="screen hidden" id="screen-report">
+            <div class="screen-content">
+                <button class="back-button" onclick="showScreen('screen-home')">Arrow Back</button>
+            </div>
+        </div>
+    </div>  
+    <script>
+        function showScreen(id)
+        {
+            document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
+            document.getElementById(id).classList.remove('hidden');
+        }
+    </script>
+</body>
+</html>
