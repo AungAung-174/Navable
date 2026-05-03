@@ -193,6 +193,115 @@
         outline: 3px solid #1a1a1a;
         outline-offset: 2px;
     }
+    /* ── SEARCH BOX ── */
+    #search-box {
+      background-color: #2a2a2a;
+      border-radius: 16px;
+      padding: 16px;
+      margin-bottom: 16px;
+    }
+
+    #search-title {
+      font-size: 14px;
+      color: #888;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      margin-bottom: 10px;
+    }
+
+    #search-row {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+
+    #destination-input {
+      flex: 1;
+      background-color: #1a1a1a;
+      border: 2px solid #444;
+      border-radius: 10px;
+      padding: 12px 14px;
+      color: white;
+      font-size: 15px;
+      font-family: Arial, sans-serif;
+      outline: none;
+    }
+
+    #destination-input:focus {
+      border-color: #FFC107;
+    }
+
+    #destination-input::placeholder {
+      color: #666;
+    }
+
+    #mic-btn {
+      background-color: #1a1a1a;
+      border: 2px solid #444;
+      border-radius: 10px;
+      width: 48px;
+      font-size: 20px;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+
+    #mic-btn.listening {
+      border-color: #FF5252;
+      background-color: #3a0000;
+      animation: pulse 1s infinite;
+    }
+
+    @keyframes pulse {
+      0%   { opacity: 1; }
+      50%  { opacity: 0.5; }
+      100% { opacity: 1; }
+    }
+
+    #search-results {
+      display: none;
+      background-color: #1a1a1a;
+      border-radius: 10px;
+      margin-bottom: 8px;
+      overflow: hidden;
+    }
+
+    .search-result-item {
+      padding: 12px 14px;
+      font-size: 14px;
+      color: white;
+      cursor: pointer;
+      border-bottom: 1px solid #333;
+    }
+
+    .search-result-item:last-child {
+      border-bottom: none;
+    }
+
+    .search-result-item:hover {
+      background-color: #2a2a2a;
+    }
+
+    #go-btn {
+      width: 100%;
+      background-color: #FFC107;
+      border: none;
+      border-radius: 10px;
+      padding: 14px;
+      font-size: 16px;
+      font-weight: bold;
+      color: #1a1a1a;
+      cursor: pointer;
+    }
+
+    #go-btn:disabled {
+      background-color: #444;
+      color: #888;
+      cursor: not-allowed;
+    }
+
+    #go-btn:active {
+      background-color: #E6AC00;
+    }
   </style>
 </head>
 <body>
@@ -222,6 +331,28 @@
         aria-label="All alerts"
         onclick="setFrequency('high')">All Alerts</button>
     </div>
+  </div>
+
+  <!-- Destination search -->
+  <div id="search-box">
+    <div id="search-title">Where to?</div>
+    <div id="search-row">
+      <input type="text"
+           id="destination-input"
+           placeholder="Enter destination..."
+           aria-label="Enter destination"
+           oninput="onSearchInput(this.value)" />
+      <button id="mic-btn"
+            aria-label="Voice input"
+            onclick="startVoiceInput()">🎤</button>
+    </div>
+    <div id="search-results"></div>
+    <button id="go-btn"
+          aria-label="Start navigation"
+          onclick="startNavigation()"
+          disabled>
+    Go →
+    </button>
   </div>
 
 <!-- Map -->
@@ -280,6 +411,104 @@
     let lastDirection = "Waiting for route...";
     let voiceEnabled = true;
     let currentVolume = 1.0;
+    let selectedDestination = null;
+    let recognition = null;
+
+// ── SEARCH INPUT ─────────────────────────────────────
+    function onSearchInput(value) {
+      if (value.length < 2) {
+        document.getElementById("search-results").style.display = "none";
+        document.getElementById("go-btn").disabled = true;
+        selectedDestination = null;
+        return;
+      }
+  // Google Places Autocompleteと連携（APIキーがあれば）
+  // 今はデモ用にモック結果を表示
+      showMockResults(value);
+    }
+
+    function showMockResults(query) {
+      const results = document.getElementById("search-results");
+      results.innerHTML = "";
+      results.style.display = "block";
+
+  // デモ用のサンプル場所（実際はGoogle Places APIから取得）
+      const mockPlaces = [
+        "Kelley Engineering Center, OSU",
+        "Valley Library, OSU",
+        "Memorial Union, OSU",
+        "Dixon Recreation Center, OSU",
+        "Weatherford Hall, OSU",
+      ].filter(p => p.toLowerCase().includes(query.toLowerCase()));
+
+      if (mockPlaces.length === 0) {
+        results.style.display = "none";
+        return;
+      }
+
+      mockPlaces.forEach(place => {
+        const item = document.createElement("div");
+        item.className = "search-result-item";
+        item.textContent = place;
+        item.onclick = () => selectDestination(place);
+        results.appendChild(item);
+      });
+    }
+
+    function selectDestination(place) {
+      selectedDestination = place;
+      document.getElementById("destination-input").value = place;
+      document.getElementById("search-results").style.display = "none";
+      document.getElementById("go-btn").disabled = false;
+      if (voiceEnabled) speakAlert("Destination set to " + place);
+    }
+
+// ── VOICE INPUT ──────────────────────────────────────
+    function startVoiceInput() {
+      if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+        speakAlert("Voice input is not supported on this browser.");
+        return;
+      }
+     
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      recognition = new SpeechRecognition();
+      recognition.lang = "en-US";
+      recognition.interimResults = false;
+      recognition.maxAlternatives = 1;
+
+      const micBtn = document.getElementById("mic-btn");
+      micBtn.classList.add("listening");
+      micBtn.textContent = "⏹";
+      if (voiceEnabled) speakAlert("Listening. Say your destination.");
+
+      recognition.onresult = (event) => {
+        const transcript = event.results[0][0].transcript;
+        document.getElementById("destination-input").value = transcript;
+        onSearchInput(transcript);
+        if (voiceEnabled) speakAlert("I heard: " + transcript);
+      };
+
+      recognition.onend = () => {
+        micBtn.classList.remove("listening");
+        micBtn.textContent = "🎤";
+      };
+
+      recognition.onerror = () => {
+        micBtn.classList.remove("listening");
+        micBtn.textContent = "🎤";
+        if (voiceEnabled) speakAlert("Could not hear you. Please try again.");
+      };
+
+      recognition.start();
+    }
+
+// ── START NAVIGATION ─────────────────────────────────
+    function startNavigation() {
+      if (!selectedDestination) return;
+      if (voiceEnabled) speakAlert("Starting navigation to " + selectedDestination);
+      setDirection("Head toward " + selectedDestination, "↑");
+  // 実際はGoogle Maps Directions APIと連携してルートを取得
+    }
 
     function setFrequency(level) {
       currentVolume = level;
@@ -287,34 +516,33 @@
 
       ["low", "medium", "high"].forEach(l => {
         document.getElementById("vol-" + l).classList.toggle("active", l === level);
-    });
+      });
 
     // contrastがオンなら色を再適用
-    const contrast = localStorage.getItem("highContrast") === "true";
-    if (contrast) {
+      const contrast = localStorage.getItem("highContrast") === "true";
+      if (contrast) {
         document.querySelectorAll(".vol-btn").forEach(el => {
-            el.style.color = "white";
-            el.style.backgroundColor = "#2a2a2a";
-            el.style.borderColor = "#FFC107";
-            el.style.outline = "2px solid #FFC107";
+          el.style.color = "white";
+          el.style.backgroundColor = "#2a2a2a";
+          el.style.borderColor = "#FFC107";
+          el.style.outline = "2px solid #FFC107";
         });
         document.querySelectorAll(".vol-btn.active").forEach(el => {
-            el.style.color = "#1a1a1a";
-            el.style.backgroundColor = "#FFC107";
+          el.style.color = "#1a1a1a";
+          el.style.backgroundColor = "#FFC107";
         });
-    }
+      }
 
-    const labels = {
+      const labels = {
         low:    "Minimal alerts. High urgency hazards only.",
         medium: "Normal alerts. High and medium urgency hazards.",
         high:   "All alerts. Every hazard will be announced.",
-    };
+      };
 
-    if(voiceEnabled)
-    {
-      speakAlert(labels[level]);
+      if(voiceEnabled){
+        speakAlert(labels[level]);
+      }
     }
-}
 
     function toggleVoice() {
       voiceEnabled = !voiceEnabled;
@@ -392,6 +620,15 @@
             document.querySelectorAll("*").forEach(el => {
                 el.style.fontWeight = "bold";
             });
+            document.getElementById("search-box").style.backgroundColor = "#E6AC00";
+            document.getElementById("search-title").style.color = "#333";
+            document.getElementById("destination-input").style.backgroundColor = "#1a1a1a";
+            document.getElementById("destination-input").style.color = "white";
+            document.getElementById("destination-input").style.borderColor = "#1a1a1a";
+            document.getElementById("mic-btn").style.backgroundColor = "#1a1a1a";
+            document.getElementById("mic-btn").style.borderColor = "#1a1a1a";
+            document.getElementById("go-btn").style.backgroundColor = "#1a1a1a";
+            document.getElementById("go-btn").style.color = "#FFC107";
     // Invert button colors
             document.querySelectorAll(".action-btn").forEach(el => {
                 el.style.backgroundColor = "#E6AC00";
