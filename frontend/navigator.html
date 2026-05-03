@@ -61,7 +61,7 @@
       color: white;
     }
 
-    #speaker-btn {
+    /*#speaker-btn {
       background-color: #4CAF50;
       border: none;
       border-radius: 8px;
@@ -72,7 +72,7 @@
       display: flex;
       align-items: center;
       justify-content: center;
-    }
+    }*/
 
     #volume-btns {
       display: grid;
@@ -209,7 +209,7 @@
   <div id="voiceover-box">
     <div id="voiceover-header">
       <span id="voiceover-title">Voiceover Controls</span>
-      <button id="speaker-btn" aria-label="Toggle voice" onclick="toggleVoice()">🔊</button>
+      <!--<button id="speaker-btn" aria-label="Toggle voice" onclick="toggleVoice()">🔊</button>-->
     </div>
     <div id="volume-btns">
       <button class="vol-btn" id="vol-low"
@@ -233,7 +233,7 @@
     <div id="direction-text">Waiting for route...</div>
     <div id="direction-sub">Following accessible route</div>
   </div>
->
+
 
   <!-- Hazard banner (hidden until triggered) -->
   <div id="hazard-banner" role="alert">
@@ -275,27 +275,42 @@
   <script src="js/voice.js"></script>
   <script src="javascript/map.js"></script>
   <script async defer
-    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCezLeBuqA6vIyc6U1v6sUgUfDheWLjCG8&callback=initMap"></script>
+    src=""></script>
   <script>
     let lastDirection = "Waiting for route...";
     let voiceEnabled = true;
     let currentVolume = 1.0;
 
     function setFrequency(level) {
-        currentVolume = level; // 'low', 'medium', 'high'
-        localStorage.setItem("alertFrequency", level);
+      currentVolume = level;
+      localStorage.setItem("alertFrequency", level);
 
-        ["low", "medium", "high"].forEach(l => {
+      ["low", "medium", "high"].forEach(l => {
         document.getElementById("vol-" + l).classList.toggle("active", l === level);
-        });
+    });
 
-        const labels = {
-            low:    "Minimal alerts. High urgency hazards only.",
-            medium: "Normal alerts. High and medium urgency hazards.",
-            high:   "All alerts. Every hazard will be announced",
-        };
-        speakAlert(labels[level]);
+    // contrastがオンなら色を再適用
+    const contrast = localStorage.getItem("highContrast") === "true";
+    if (contrast) {
+        document.querySelectorAll(".vol-btn").forEach(el => {
+            el.style.color = "white";
+            el.style.backgroundColor = "#2a2a2a";
+            el.style.borderColor = "#FFC107";
+            el.style.outline = "2px solid #FFC107";
+        });
+        document.querySelectorAll(".vol-btn.active").forEach(el => {
+            el.style.color = "#1a1a1a";
+            el.style.backgroundColor = "#FFC107";
+        });
     }
+
+    const labels = {
+        low:    "Minimal alerts. High urgency hazards only.",
+        medium: "Normal alerts. High and medium urgency hazards.",
+        high:   "All alerts. Every hazard will be announced.",
+    };
+    speakAlert(labels[level]);
+}
 
     function toggleVoice() {
       voiceEnabled = !voiceEnabled;
@@ -386,10 +401,16 @@
             document.getElementById("top-title").style.color = "#1a1a1a";
             document.getElementById("back-btn").style.color = "#1a1a1a";
             document.querySelectorAll(".vol-btn").forEach(el => {
-                el.style.color = "#1a1a1a";
-                el.style.backgroundColor = 'E6AC00';
-                el.style.borderColor = "#1a1a1a";
+                el.style.color ="white";
+                el.style.backgroundColor = "#2a2a2a";
+                el.style.borderColor = "#FFC107";
+                el.style.outline = "2px solid #FFC107";
+                el.style.outlineOffset = "2px";
             })
+            document.querySelectorAll(".vol-btn.active").forEach(el => {
+                el.style.color = "#1a1a1a";
+                el.style.backgroundColor = "#FFC107";
+            });
         }
 
   // Apply large text
@@ -402,7 +423,7 @@
         }
 
   // Apply frequency
-        setFrequency(frequency, false);
+        setFrequency(frequency);
 
         watchUserLocation();
     });
