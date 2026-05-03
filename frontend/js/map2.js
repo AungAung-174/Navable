@@ -353,14 +353,36 @@ function checkHazardsOnRoute() {
   const routePath = currentRoute.routes[0].overview_path;
   const routeThreshold = 120;
 
+  // ルート上の全障害物を収集
+  const hazardsOnRoute = [];
+
   (window.hazards || []).forEach(hazard => {
     const distance = distanceToRouteMeters(hazard, routePath);
+    if (distance <= routeThreshold) {
+      hazardsOnRoute.push({ ...hazard, distanceToRoute: distance });
+    }
+  });
 
-    if (distance <= routeThreshold && !warnedRouteHazards.has(hazard.id)) {
+  if (hazardsOnRoute.length === 0) return;
+
+  // 距離順にソート（ルートに一番近いものを先に）
+  hazardsOnRoute.sort((a, b) => a.distanceToRoute - b.distanceToRoute);
+
+  // 一番近い障害物を音声で読み上げ
+  const nearest = hazardsOnRoute[0];
+  if (!warnedRouteHazards.has(nearest.id)) {
+    warnedRouteHazards.add(nearest.id);
+    const text = `Warning: ${nearest.alert_text} is on your route.`;
+    showHazardWarning(text);
+  }
+
+  // 残りも順番にアラート（1秒ずつ遅らせて重ならないように）
+  hazardsOnRoute.slice(1).forEach((hazard, i) => {
+    if (!warnedRouteHazards.has(hazard.id)) {
       warnedRouteHazards.add(hazard.id);
-
-      const text = `Hazard on route: ${hazard.alert_text}`;
-      showHazardWarning(text);
+      setTimeout(() => {
+        showHazardWarning(`Also on your route: ${hazard.alert_text}`);
+      }, (i + 1) * 3000);
     }
   });
 }
