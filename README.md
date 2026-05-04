@@ -17,10 +17,10 @@ Navable is a hazard reporting and navigation web app that crowdsources ADA-speci
 
 | Member | Role | Contributions |
 |---|---|---|
-| **Aung Aung** | Backend Developer | Flask REST API, Google Gemini Vision integration, Firebase Firestore schema and sync, Waze API integration, Render deployment, environment-based credential management |
-| **[Teammate 1]** | Frontend Developer | HTML/CSS/JS UI, Google Maps integration, route generation, hazard pin rendering, report form |
-| **[Teammate 2]** | Accessibility & Voice | Web Speech API voice alerts, proximity detection, screen reader support, settings + accessibility presets |
-| **Zakia** | Product & UX | Screen designs, Gemini prompt design, hazard taxonomy, pitch deck, demo script |
+| **Aung Aung Myint Myat** | Backend Developer | Flask REST API, Google Gemini Vision integration, Firebase Firestore schema and sync, Waze API integration, Render deployment, environment-based credential management |
+| **Tisya Tomar** | Frontend Developer | HTML/CSS/JS UI, Google Maps integration, route generation, hazard pin rendering, report form |
+| **Taichi Yoshikawa** | Accessibility & Voice | Web Speech API voice alerts, proximity detection, screen reader support, settings + accessibility presets |
+| **Zakia Yesmin** | Product & UX | Screen designs, Gemini prompt design, hazard taxonomy, pitch deck, demo script |
 
 ## Tech Stack
 
